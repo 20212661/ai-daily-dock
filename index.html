@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Daily Dock · 桌面悬浮 AI 协作计划面板</title>
+<link rel="stylesheet" href="css/dock.css">
+<style>
+  /* launcher 专用样式（tokens / 画布 / reset 见 css/dock.css） */
+  .launch{max-width:920px; margin:0 auto; padding:48px 28px 64px; display:flex; flex-direction:column; gap:42px}
+  .lnav{display:flex; align-items:center; justify-content:space-between}
+  .lnav__brand{display:inline-flex; align-items:center; gap:9px; font-size:14px; font-weight:700; color:var(--fg-strong); letter-spacing:-.01em; text-decoration:none}
+  .lnav__logo{width:26px;height:26px;border-radius:var(--r-ctl); background:var(--accent-soft); color:var(--accent-ink); display:grid; place-items:center}
+  .lnav__logo svg{width:16px;height:16px}
+  .lnav__ver{font-family:var(--num); font-size:11px; color:var(--muted)}
+
+  .hero{max-width:660px}
+  .hero__kicker{font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.02em; margin-bottom:18px}
+  .hero__title{font-size:clamp(34px,5.2vw,52px); font-weight:700; color:var(--fg-strong); letter-spacing:-.025em; line-height:1.08; margin:0}
+  .hero__sub{font-size:15px; color:var(--muted); line-height:1.65; margin:18px 0 24px; max-width:52ch}
+  .hero__cta{display:flex; gap:10px; flex-wrap:wrap}
+  .cta{font-family:var(--font); font-size:13px; font-weight:600; border-radius:var(--r-btn); padding:11px 18px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .16s, transform .1s}
+  .cta--primary{background:var(--accent); color:#fff; box-shadow:0 8px 18px -8px var(--accent)}
+  .cta--primary:hover{background:var(--accent-strong)}
+  .cta--primary:active{transform:translateY(1px)}
+  .cta--ghost{background:var(--card); color:var(--fg); border:1px solid var(--hair)}
+  .cta--ghost:hover{background:#fff}
+
+  .blk-h{font-size:11px; font-weight:700; color:var(--fg-strong); letter-spacing:.02em; margin-bottom:10px}
+  .modes{display:flex; flex-direction:column}
+  .mode{display:flex; align-items:baseline; gap:16px; font-size:13.5px; padding:9px 0; border-bottom:1px solid var(--hair-2)}
+  .mode:last-child{border-bottom:none}
+  .mode b{flex:none; width:54px; color:var(--fg-strong); font-weight:700}
+  .mode span{color:var(--muted); line-height:1.5}
+
+  .surfaces{display:flex; flex-direction:column; gap:10px}
+  .surf{display:block; text-decoration:none; color:inherit; background:var(--card); border:1px solid var(--hair); border-radius:var(--r-card); padding:16px 18px; transition:background .16s, transform .16s, border-color .16s}
+  .surf:hover{background:rgba(255,255,255,0.64); transform:translateY(-1px)}
+  .surf--main{background:linear-gradient(160deg,var(--accent-soft),var(--card)); border-color:var(--ink-line)}
+  .surf--main:hover{background:linear-gradient(160deg,var(--ink-soft),var(--card-2))}
+  .surf__top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .surf__t{font-size:13.5px; font-weight:700; color:var(--fg-strong); letter-spacing:-.01em}
+  .surf--main .surf__t{font-size:17px}
+  .surf__arrow{color:var(--accent-ink); font-weight:700; font-size:16px}
+  .surf__d{font-size:12.5px; color:var(--muted); line-height:1.5; margin-top:5px}
+  .surf-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+  .surf-row .surf{padding:14px 15px}
+  @media(max-width:680px){.surf-row{grid-template-columns:1fr}}
+
+  .lfoot{font-size:11px; color:var(--muted-2); line-height:1.7; padding-top:18px; border-top:1px solid var(--hair-2)}
+  .lfoot b{color:var(--muted); font-weight:600}
+</style>
+</head>
+<body>
+<div class="launch">
+
+  <nav class="lnav">
+    <a class="lnav__brand" href="dock.html"><span class="lnav__logo"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5l1.7 5.3 5.3 1.7-5.3 1.7L12 16.5l-1.7-5.3L5 9.5l5.3-1.7z"/></svg></span>AI Daily Dock</a>
+    <span class="lnav__ver">v0.12.0</span>
+  </nav>
+
+  <header class="hero">
+    <div class="hero__kicker">Desktop Floating Widget · 暖羊皮纸编辑风 · 轻像素复古点缀</div>
+    <h1 class="hero__title">桌面便利贴，<br>连上 AI 任务调度。</h1>
+    <p class="hero__sub">固定在桌面右侧的悬浮窗口：今日计划、把想法丢给 AI 拆解、看 Agent 执行进度、每日复盘，一处搞定。不是后台管理，是安静常驻的协作 Dock。</p>
+    <div class="hero__cta">
+      <a class="cta cta--primary" href="dock.html">打开 Dock →</a>
+      <a class="cta cta--ghost" href="recap-history.html">查看历史复盘</a>
+    </div>
+  </header>
+
+  <section class="modes">
+    <div class="blk-h">三态切换</div>
+    <div class="mode"><b>展开</b><span>完整九区，今日计划与 AI 协作全展开，是主视觉。</span></div>
+    <div class="mode"><b>紧凑</b><span>桌面便利贴，时间、当前任务、进度一眼看清。</span></div>
+    <div class="mode"><b>专注</b><span>只留当前任务与倒计时，沉浸做事不被打扰。</span></div>
+  </section>
+
+  <section class="surfaces">
+    <div class="blk-h">入口</div>
+    <a class="surf surf--main" href="dock.html">
+      <div class="surf__top"><span class="surf__t">主 Dock</span><span class="surf__arrow">→</span></div>
+      <div class="surf__d">三态悬浮面板本体。可拖动、边缘吸附、点 Agent 看详情抽屉、生成可展开复盘报告。</div>
+    </a>
+    <div class="surf-row">
+      <a class="surf" href="settings.html"><div class="surf__t">设置</div><div class="surf__d">外观、行为、Agent 默认、快捷键。</div></a>
+      <a class="surf" href="agent-detail.html"><div class="surf__t">Agent 任务详情</div><div class="surf__d">步骤流水、输出预览、运行历史。</div></a>
+      <a class="surf" href="recap-history.html"><div class="surf__t">历史复盘</div><div class="surf__d">本周总览、7 天趋势、每日归档。</div></a>
+    </div>
+  </section>
+
+  <footer class="lfoot">
+    <b>Desktop Floating Widget Design System</b> · 暖羊皮纸编辑风（#f5f4ed / 墨蓝 #1B365D）· 单衬线 · 轻像素复古点缀（机器人 / 蘑菇 / 像素菱形）· 参考 Notion、Raycast、纸本编辑器、8-bit 像素游戏。<br>
+    只设计悬浮面板本体，不画桌面环境。本页为产品入口，点「打开 Dock」进入主面板。
+  </footer>
+
+</div>
+</body>
+</html>

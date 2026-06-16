@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设置 · AI Daily Dock</title>
+<link rel="stylesheet" href="css/dock.css">
+<style>
+  /* tokens / reset / 画布背景 → css/dock.css */
+  .page{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 24px 60px}
+  .panel{width:580px; max-width:100%; max-height:88vh; background:var(--glass-1);
+    border:1px solid var(--hair); border-radius:var(--r-panel); box-shadow:var(--sh-panel);
+    display:flex; flex-direction:column; overflow:hidden}
+  .panel__head{padding:18px 22px 16px; border-bottom:1px solid var(--hair-2); background:linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0.04))}
+  .back{font-size:11.5px; font-weight:600; color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-bottom:10px; transition:.15s}
+  .back:hover{color:var(--accent-ink)}
+  .panel__title{font-size:20px; font-weight:700; color:var(--fg-strong); letter-spacing:-.015em; line-height:1.1}
+  .panel__sub{font-size:12px; color:var(--muted); margin-top:4px}
+  .panel__body{flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; scrollbar-width:thin; scrollbar-color:rgba(120,116,140,.3) transparent}
+  .panel__body::-webkit-scrollbar{width:8px}
+  .panel__body::-webkit-scrollbar-thumb{background:rgba(120,116,140,.22); border-radius:8px; border:2px solid transparent; background-clip:padding-box}
+  .panel__foot{display:flex; align-items:center; gap:10px; padding:13px 18px; border-top:1px solid var(--hair-2); background:linear-gradient(0deg,rgba(255,255,255,0.4),rgba(255,255,255,0.06))}
+  .saved{font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px}
+  .saved .dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
+
+  .set{background:var(--card); border:1px solid var(--hair); border-radius:var(--r-card); padding:14px 15px}
+  .set__h{font-size:13px; font-weight:700; color:var(--fg-strong); letter-spacing:-.005em; margin-bottom:8px; display:flex; align-items:center; gap:6px}
+  .set__row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--hair-2)}
+  .set__row:last-child{border-bottom:none}
+  .set__row .k{font-size:12.5px; color:var(--fg); font-weight:500; flex:1; min-width:0}
+  .set__row .k small{display:block; font-size:10.5px; color:var(--muted); font-weight:400; margin-top:2px; line-height:1.35}
+  .set__row .v{flex:none; display:flex; align-items:center; gap:8px}
+
+  .toggle{width:38px;height:22px;border-radius:99px;background:rgba(120,116,140,0.28);position:relative;cursor:pointer;transition:.22s;flex:none;border:none;padding:0}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:.22s}
+  .toggle.on{background:var(--accent)}
+  .toggle.on::after{left:18px}
+
+  .seg{display:inline-flex;background:var(--card-2);border:1px solid var(--hair);border-radius:var(--r-btn);padding:2px;gap:2px}
+  .seg button{font-family:var(--font);font-size:11px;font-weight:600;border:none;background:transparent;color:var(--muted);padding:6px 11px;border-radius:9px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--fg-strong);box-shadow:0 1px 3px rgba(40,42,80,0.14)}
+
+  .swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,0.8);transition:.15s;flex:none;box-shadow:0 0 0 0 transparent}
+  .swatch.on{box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--fg-strong)}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;background:rgba(120,116,140,0.2);outline:none;flex:1;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 2px 6px rgba(40,42,80,0.25);border:2px solid #fff}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff}
+  .rangev{font-family:var(--num);font-size:11px;font-weight:700;color:var(--fg-strong);min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+
+  .stepper{display:inline-flex;align-items:center;gap:2px;background:var(--card-2);border:1px solid var(--hair);border-radius:var(--r-btn);padding:2px}
+  .stepper button{width:26px;height:26px;border:none;background:transparent;color:var(--muted);font-size:15px;font-weight:700;cursor:pointer;border-radius:8px;transition:.15s}
+  .stepper button:hover{background:#fff;color:var(--fg-strong)}
+  .stepper b{font-family:var(--num);font-size:12px;font-weight:700;color:var(--fg-strong);min-width:46px;text-align:center;font-variant-numeric:tabular-nums}
+
+  .sc{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--hair-2)}
+  .sc:last-child{border-bottom:none}
+  .sc .k{font-size:12px;color:var(--fg);flex:1}
+  .kbd{font-family:var(--num);font-size:10.5px;font-weight:700;color:var(--fg-strong);background:#fff;border:1px solid var(--hair);border-bottom-width:2px;border-radius:6px;padding:3px 7px;min-width:22px;text-align:center}
+
+  .btn{font-family:var(--font);font-size:11.5px;font-weight:600;border-radius:var(--r-btn);padding:8px 14px;border:1px solid transparent;cursor:pointer;transition:.16s;display:inline-flex;align-items:center;gap:6px}
+  .btn--ghost{background:var(--card-2);color:var(--fg);border-color:var(--hair)}
+  .btn--ghost:hover{background:#fff}
+  .btn--soft{background:transparent;color:var(--muted);border-color:var(--hair)}
+  .btn--soft:hover{color:var(--accent-ink);border-color:var(--accent)}
+  .about{font-size:11.5px;color:var(--muted);line-height:1.5}
+  .about b{color:var(--fg-strong);font-family:var(--num)}
+
+  /* a11y / 状态打磨 */
+  :focus{outline:none}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .btn--primary:active,.btn--ghost:active,.btn--soft:active{transform:translateY(1px)}
+  .toggle:active,.seg button:active,.stepper button:active,.swatch:active{transform:scale(.97)}
+</style>
+</head>
+<body>
+<div class="page">
+  <main class="panel" aria-label="设置">
+    <header class="panel__head">
+      <a class="back" href="dock.html">← 返回 Dock</a>
+      <div class="panel__title">设置</div>
+      <div class="panel__sub">外观、行为、Agent 与数据偏好</div>
+    </header>
+
+    <div class="panel__body" id="body">
+
+      <!-- 外观 -->
+      <section class="set">
+        <div class="set__h">外观</div>
+        <div class="set__row">
+          <div class="k">主题</div>
+          <div class="v"><div class="seg" data-seg="theme">
+            <button class="on">浅色</button><button>深色</button><button>跟随系统</button>
+          </div></div>
+        </div>
+        <div class="set__row">
+          <div class="k">强调色</div>
+          <div class="v">
+            <span class="swatch on" style="background:oklch(71% 0.135 55)" data-sw="orange" title="暖橙"></span>
+            <span class="swatch" style="background:oklch(62% 0.085 250)" data-sw="blue" title="柔和蓝紫"></span>
+          </div>
+        </div>
+        <div class="set__row">
+          <div class="k">面板透明度<small>玻璃拟态的通透程度</small></div>
+          <div class="v" style="min-width:200px"><input type="range" min="55" max="100" value="88" id="opacity" aria-label="面板透明度"><span class="rangev" id="opacityV">88%</span></div>
+        </div>
+        <div class="set__row">
+          <div class="k">面板圆角</div>
+          <div class="v"><div class="seg" data-seg="radius"><button data-v="16">16</button><button data-v="20">20</button><button class="on" data-v="24">24</button></div></div>
+        </div>
+      </section>
+
+      <!-- 行为 -->
+      <section class="set">
+        <div class="set__h">行为</div>
+        <div class="set__row"><div class="k">开机自启<small>登录后自动常驻桌面</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
+        <div class="set__row"><div class="k">常驻置顶<small>始终浮于其他窗口之上</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
+        <div class="set__row"><div class="k">拖拽边缘吸附<small>靠近屏幕边缘自动贴合</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
+        <div class="set__row"><div class="k">双击标题栏复位</div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
+        <div class="set__row"><div class="k">默认专注时长</div><div class="v"><div class="seg" data-seg="focus"><button class="on" data-v="25">25 min</button><button data-v="45">45 min</button><button data-v="60">60 min</button></div></div></div>
+        <div class="set__row"><div class="k">提醒方式</div><div class="v"><div class="seg" data-seg="notify"><button class="on">Toast</button><button class="on">系统通知</button><button>声音</button></div></div></div>
+      </section>
+
+      <!-- AI API 配置 -->
+      <section class="set">
+        <div class="set__h">🤖 AI API 配置</div>
+        <div class="set__row"><div class="k">模型<small id="aiModelHint">GLM-4.5（智谱）</small></div><div class="v" style="flex:1;max-width:280px"><select id="aiModelSelect" style="width:100%;font-family:var(--font);font-size:11.5px;padding:6px 8px;border:1px solid var(--hair);border-radius:var(--r-ctl);background:var(--card);color:var(--fg);outline:none"></select></div></div>
+        <div class="set__row" id="aiCustomRow" style="display:none"><div class="k">自定义 API URL<small>OpenAI 兼容格式</small></div><div class="v" style="flex:1;max-width:280px"><input type="text" id="aiCustomUrl" placeholder="https://your-api.com/v1/chat/completions" style="width:100%;font-family:var(--num);font-size:11px;padding:6px 8px;border:1px solid var(--hair);border-radius:var(--r-ctl);background:var(--card);color:var(--fg);outline:none"></div></div>
+        <div class="set__row" id="aiCustomModelRow" style="display:none"><div class="k">自定义模型名<small>如 gpt-4o、qwen-max 等</small></div><div class="v" style="flex:1;max-width:280px"><input type="text" id="aiCustomModel" placeholder="model-name" style="width:100%;font-family:var(--num);font-size:11px;padding:6px 8px;border:1px solid var(--hair);border-radius:var(--r-ctl);background:var(--card);color:var(--fg);outline:none"></div></div>
+        <div class="set__row"><div class="k">API Key<small id="aiKeyHint">加密存储，不上传</small></div><div class="v" style="flex:1;max-width:280px"><input type="password" id="aiKeyInput" placeholder="粘贴你的 API Key…" style="width:100%;font-family:var(--num);font-size:11px;padding:6px 8px;border:1px solid var(--hair);border-radius:var(--r-ctl);background:var(--card);color:var(--fg);outline:none"></div></div>
+        <div class="set__row"><div class="k">测试<small>验证当前配置是否可用</small></div><div class="v"><button class="btn btn--soft" id="aiTestBtn" style="font-size:11px">测试连接</button><button class="btn btn--primary" id="aiSaveBtn" style="font-size:11px;margin-left:6px">保存配置</button></div></div>
+      </section>
+
+      <!-- Agent 默认行为 -->
+      <section class="set">
+        <div class="set__h">Agent 默认行为</div>
+        <div class="set__row"><div class="k">默认 Agent<small>派活时优先调用</small></div><div class="v"><div class="seg" data-seg="agent"><button class="on">SeeAgent-Planner</button><button>通用助手</button></div></div></div>
+        <div class="set__row"><div class="k">自动确认阈值<small>仅自动确认低于该风险的操作</small></div><div class="v"><div class="seg" data-seg="risk"><button class="on">保守</button><button>均衡</button><button>激进</button></div></div></div>
+        <div class="set__row"><div class="k">失败自动重试</div><div class="v"><div class="stepper" data-sp="3" data-min="0" data-max="5"><button data-d="-1" aria-label="减少">−</button><b>3 次</b><button data-d="1" aria-label="增加">+</button></div></div></div>
+        <div class="set__row"><div class="k">并发上限<small>同时运行的 Agent 数</small></div><div class="v"><div class="stepper" data-sp="3" data-min="1" data-max="6"><button data-d="-1" aria-label="减少">−</button><b>3 个</b><button data-d="1" aria-label="增加">+</button></div></div></div>
+      </section>
+
+      <!-- 数据 -->
+      <section class="set">
+        <div class="set__h">数据与隐私</div>
+        <div class="set__row"><div class="k">导出本周数据<small>JSON · 含任务、复盘、Agent 记录</small></div><div class="v"><button class="btn btn--soft" data-act="export">导出</button></div></div>
+        <div class="set__row"><div class="k">清空本地缓存<small>面板位置与临时数据</small></div><div class="v"><button class="btn btn--soft" data-act="cache">清空</button></div></div>
+        <div class="set__row"><div class="k">重置面板布局<small>三态面板回到默认位置</small></div><div class="v"><button class="btn btn--soft" data-act="reset">重置</button></div></div>
+      </section>
+
+      <!-- 快捷键 -->
+      <section class="set">
+        <div class="set__h">快捷键</div>
+        <div class="sc"><span class="k">新建任务</span><span><span class="kbd">⌘</span> <span class="kbd">N</span></span></div>
+        <div class="sc"><span class="k">派活给 AI</span><span><span class="kbd">⌘</span> <span class="kbd">D</span></span></div>
+        <div class="sc"><span class="k">开始 / 暂停专注</span><span><span class="kbd">⌘</span> <span class="kbd">F</span></span></div>
+        <div class="sc"><span class="k">展开 / 折叠面板</span><span><span class="kbd">⌘</span> <span class="kbd">E</span></span></div>
+        <div class="sc"><span class="k">生成今日复盘</span><span><span class="kbd">⌘</span> <span class="kbd">⇧</span> <span class="kbd">R</span></span></div>
+        <div class="sc"><span class="k">打开设置</span><span><span class="kbd">⌘</span> <span class="kbd">,</span></span></div>
+      </section>
+
+      <!-- 关于 -->
+      <section class="set">
+        <div class="set__h">关于</div>
+        <div class="about">AI Daily Dock · <b>v0.11.0</b>（2026.06.15）<br>桌面便利贴 + AI 任务调度台 + Agent 执行进度面板。</div>
+        <div class="set__row" style="border-top:1px solid var(--hair-2);margin-top:10px;padding-top:12px"><div class="k">检查更新</div><div class="v"><button class="btn btn--soft" data-act="update">检查</button></div></div>
+      </section>
+
+    </div>
+
+    <footer class="panel__foot">
+      <span class="saved"><span class="dot"></span>已自动保存</span>
+      <button class="btn btn--ghost" style="margin-left:auto" data-act="restore">还原所有默认设置</button>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  // toggle
+  document.querySelectorAll('[data-tg]').forEach(t=>t.addEventListener('click',()=>{t.classList.toggle('on'); t.setAttribute('aria-checked', t.classList.contains('on'));}));
+  // segmented (单选)
+  document.querySelectorAll('.seg[data-seg="theme"],.seg[data-seg="radius"],.seg[data-seg="focus"],.seg[data-seg="agent"],.seg[data-seg="risk"]').forEach(seg=>{
+    seg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; seg.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  });
+  // 多选 segmented（提醒方式）
+  document.querySelector('.seg[data-seg="notify"]').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; b.classList.toggle('on'); });
+  // swatch
+  document.querySelectorAll('[data-sw]').forEach(s=>s.addEventListener('click',()=>{ document.querySelectorAll('[data-sw]').forEach(x=>x.classList.remove('on')); s.classList.add('on'); }));
+  // slider
+  const op=document.getElementById('opacity'), opv=document.getElementById('opacityV');
+  op.addEventListener('input',()=>opv.textContent=op.value+'%');
+  // stepper
+  document.querySelectorAll('.stepper').forEach(sp=>{
+    const min=+sp.dataset.min, max=+sp.dataset.max, unit=sp.querySelector('b').textContent.replace(/[0-9 ]/g,'');
+    let val=+sp.dataset.sp;
+    sp.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+      val=Math.max(min,Math.min(max,val+ +b.dataset.d));
+      sp.querySelector('b').textContent=val+' '+unit.trim();
+    }));
+  });
+  // —— AI API Key 配置 ——
+  var aiKeyInput=document.getElementById('aiKeyInput');
+  var aiKeyHint=document.getElementById('aiKeyHint');
+  var aiModelHint=document.getElementById('aiModelHint');
+  var aiModelSelect=document.getElementById('aiModelSelect');
+  var aiCustomRow=document.getElementById('aiCustomRow');
+  var aiCustomModelRow=document.getElementById('aiCustomModelRow');
+  var aiCustomUrl=document.getElementById('aiCustomUrl');
+  var aiCustomModel=document.getElementById('aiCustomModel');
+  var aiSaveBtn=document.getElementById('aiSaveBtn');
+  var aiTestBtn=document.getElementById('aiTestBtn');
+  // 启动时加载配置和预设列表
+  if(window.dock&&window.dock.ai){
+    window.dock.ai.getConfig().then(function(cfg){
+      if(!cfg)return;
+      // 填充模型下拉
+      if(cfg.presets){
+        var html='';
+        cfg.presets.forEach(function(p){
+          html+='<option value="'+p.id+'">'+p.name+'</option>';
+        });
+        aiModelSelect.innerHTML=html;
+        // 选中当前模型
+        var found=cfg.presets.filter(function(p){return p.model===cfg.model;});
+        if(found.length>0) aiModelSelect.value=found[0].id;
+        else if(cfg.model){ aiModelSelect.value='custom'; aiCustomRow.style.display='flex'; aiCustomModelRow.style.display='flex'; aiCustomUrl.value=cfg.url||''; aiCustomModel.value=cfg.model||''; }
+      }
+      if(cfg.useMock){ aiModelHint.textContent=cfg.model+'（Mock 模式）'; }
+      else { aiModelHint.textContent=cfg.model+'（真实 API）'; }
+    });
+    // 模型切换：显示/隐藏自定义输入
+    aiModelSelect.addEventListener('change',function(){
+      if(aiModelSelect.value==='custom'){
+        aiCustomRow.style.display='flex';
+        aiCustomModelRow.style.display='flex';
+      }else{
+        aiCustomRow.style.display='none';
+        aiCustomModelRow.style.display='none';
+      }
+      var name=aiModelSelect.options[aiModelSelect.selectedIndex].text;
+      aiModelHint.textContent=name;
+    });
+    // 检查 Key 是否已配置
+    window.dock.ai.hasKey().then(function(has){
+      if(has){
+        aiKeyHint.textContent='✅ 已配置（加密存储中）';
+        aiKeyInput.placeholder='已保存，如需更换请重新输入';
+      }
+    });
+  }
+  // 保存配置（Key + 模型选择）
+  if(aiSaveBtn) aiSaveBtn.addEventListener('click',function(){
+    if(!window.dock||!window.dock.ai){toast('需在 Electron 中运行才能保存');return;}
+    aiSaveBtn.textContent='保存中…';
+    var presetId=aiModelSelect.value;
+    var customUrl=aiCustomUrl.value.trim();
+    var customModel=aiCustomModel.value.trim();
+    // 先切换模型
+    window.dock.ai.setModel(presetId,customUrl,customModel).then(function(){
+      // 再保存 Key（如果填了）
+      var key=aiKeyInput.value.trim();
+      if(key){
+        return window.dock.ai.saveKey(key);
+      }
+      return {ok:true};
+    }).then(function(r){
+      aiSaveBtn.textContent='保存配置';
+      if(r&&r.ok){
+        if(aiKeyInput.value){ aiKeyHint.textContent='✅ 已配置（加密存储）'; aiKeyInput.value=''; aiKeyInput.placeholder='已保存，如需更换请重新输入'; }
+        toast('配置已保存');
+      }else{
+        toast('保存失败：'+(r&&r.error||''),'err');
+      }
+    });
+  });
+  // 测试连接
+  if(aiTestBtn) aiTestBtn.addEventListener('click',function(){
+    aiTestBtn.textContent='测试中…';
+    if(window.dock&&window.dock.ai){
+      // 先应用当前选择的模型（不保存，仅测试）
+      var presetId=aiModelSelect.value;
+      var customUrl=aiCustomUrl.value.trim();
+      var customModel=aiCustomModel.value.trim();
+      window.dock.ai.setModel(presetId,customUrl,customModel).then(function(){
+        return window.dock.ai.draftSteps('测试：帮我拆解「写一篇文章」',{title:'测试任务',desc:''});
+      }).then(function(r){
+        aiTestBtn.textContent='测试连接';
+        if(r&&r.ok&&r.steps&&r.steps.length>0){
+          toast('✅ 连接成功！返回 '+r.steps.length+' 个步骤');
+        }else{
+          toast('❌ 连接失败：'+(r&&r.error||'请先保存 Key'),'err');
+        }
+      });
+    }else{
+      aiTestBtn.textContent='测试连接';
+      toast('需在 Electron 中运行','err');
+    }
+  });
+  // buttons
+  document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{
+    const a=b.dataset.act;
+    if(a==='restore') toast('已还原默认设置（演示）');
+    else if(a==='export') toast('已导出本周数据 · daily-dock-week.json');
+    else if(a==='cache') toast('已清空本地缓存 · 释放 2.3 MB');
+    else if(a==='reset') toast('已重置三态面板到默认位置');
+    else if(a==='update') toast('已是最新版本 · v0.11.0');
+  }));
+  function toast(msg){
+    const t=document.createElement('div');
+    t.textContent=msg;
+    Object.assign(t.style,{position:'fixed',left:'50%',bottom:'28px',transform:'translateX(-50%)',background:'rgba(34,36,54,0.92)',color:'#fff',fontFamily:'inherit',fontSize:'12px',fontWeight:'500',padding:'9px 14px',borderRadius:'12px',boxShadow:'0 14px 32px -10px rgba(40,42,80,0.45)',zIndex:'60',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.12)',opacity:'0',transition:'opacity .25s, transform .25s'});
+    document.body.appendChild(t);
+    requestAnimationFrame(()=>{t.style.opacity='1'});
+    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';setTimeout(()=>t.remove(),300)},2000);
+  }
+})();
+</script>
+</body>
+</html>

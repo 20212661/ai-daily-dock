@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "ai-daily-dock.html",
+  "entry": "ai-daily-dock.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-06-13T17:52:31.589Z",
+  "updatedAt": "2026-06-13T17:52:31.589Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

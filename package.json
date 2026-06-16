@@ -1,0 +1,69 @@
+{
+  "name": "ai-daily-dock",
+  "version": "0.12.0",
+  "description": "AI Daily Dock — 桌面悬浮 AI 协作计划面板（Electron 桌面应用）",
+  "productName": "AI Daily Dock",
+  "author": "Open Design",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "icon": "node scripts/make-icon.cjs",
+    "dist": "electron-builder --win",
+    "dist:dir": "electron-builder --win --dir",
+    "link-cli": "node scripts/install-cli.cjs"
+  },
+  "bin": {
+    "dock": "cli/dock-cli.cjs"
+  },
+  "devDependencies": {
+    "electron": ">=31.0.0",
+    "electron-builder": ">=24.0.0"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "build": {
+    "appId": "com.aidailydock.app",
+    "productName": "AI Daily Dock",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "aiService.js",
+      "preload.js",
+      "index.html",
+      "dock.html",
+      "settings.html",
+      "agent-detail.html",
+      "recap-history.html",
+      "css/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "AI Daily Dock"
+    },
+    "portable": {
+      "artifactName": "AI-Daily-Dock-Portable-${version}.exe"
+    }
+  }
+}

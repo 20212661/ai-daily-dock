@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+
+# Electron Builder
+release/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment / secrets
+.env
+.env.local
+
+# Electron / app cache
+*.app/
+*.exe
+*.dll
+*.node
+
+# Open Design workspace internal
+.od-skills/

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>历史复盘 · AI Daily Dock</title>
+<link rel="stylesheet" href="css/dock.css">
+<style>
+  /* tokens / reset / 画布背景 → css/dock.css */
+  .page{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 24px 60px}
+  .panel{width:600px; max-width:100%; max-height:88vh; background:var(--glass-1);
+    border:1px solid var(--hair); border-radius:var(--r-panel); box-shadow:var(--sh-panel);
+    display:flex; flex-direction:column; overflow:hidden}
+  .panel__head{padding:18px 22px 16px; border-bottom:1px solid var(--hair-2); background:linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,255,255,0.04))}
+  .back{font-size:11.5px; font-weight:600; color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-bottom:10px; transition:color .15s}
+  .back:hover{color:var(--accent-ink)}
+  .panel__title{font-size:20px; font-weight:700; color:var(--fg-strong); letter-spacing:-.015em; line-height:1.1}
+  .panel__sub{font-size:12px; color:var(--muted); margin-top:4px}
+  .panel__body{flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:rgba(120,116,140,.3) transparent}
+  .panel__body::-webkit-scrollbar{width:8px}
+  .panel__body::-webkit-scrollbar-thumb{background:rgba(120,116,140,.22); border-radius:8px; border:2px solid transparent; background-clip:padding-box}
+  .panel__foot{display:flex; gap:8px; padding:13px 18px; border-top:1px solid var(--hair-2); background:linear-gradient(0deg,rgba(255,255,255,0.4),rgba(255,255,255,0.06))}
+
+  /* ===== 编辑式总览：一个大数字 + 内联指标，去掉等宽 tile 网格 ===== */
+  .overview{display:flex; align-items:flex-end; gap:22px; flex-wrap:wrap; padding:2px 2px 18px; border-bottom:1px solid var(--hair-2)}
+  .ov__hero{flex:none}
+  .ov__big{font-family:var(--num); font-size:54px; font-weight:700; color:var(--fg-strong); letter-spacing:-.03em; line-height:.92}
+  .ov__big small{font-size:21px; color:var(--muted); font-weight:600; letter-spacing:0}
+  .ov__cap{font-size:12px; color:var(--muted); margin-top:8px}
+  .ov__cap b{color:var(--fg-strong); font-weight:600}
+  .ov__inline{display:flex; flex-wrap:wrap; gap:4px 24px; margin:0 0 6px; padding-left:24px; border-left:1px solid var(--hair-2)}
+  .ov__inline .m{display:flex; flex-direction:column; gap:2px}
+  .ov__inline .m b{font-family:var(--num); font-size:15px; font-weight:700; color:var(--fg-strong); font-variant-numeric:tabular-nums; letter-spacing:-.01em; line-height:1.1}
+  .ov__inline .m span{font-size:10px; color:var(--muted)}
+
+  /* ===== 趋势：非今日柱中性灰，只留今日强调 ===== */
+  .trend{padding:16px 2px 18px; border-bottom:1px solid var(--hair-2)}
+  .trend__cap{display:flex; align-items:baseline; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:12px}
+  .trend__cap b{color:var(--fg-strong); font-weight:600}
+  .chart{display:flex; align-items:flex-end; gap:8px; height:92px}
+  .col{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end}
+  .bar{width:100%; max-width:32px; border-radius:5px 5px 0 0; background:rgba(120,116,140,0.30); min-height:3px; transition:height .4s ease}
+  .col.rest .bar{background:rgba(120,116,140,0.15)}
+  .col.today .bar{background:linear-gradient(180deg,#2a4d7a,#1B365D); box-shadow:0 0 0 3px var(--accent-soft)}
+  .col .cnt{font-family:var(--num); font-size:10px; font-weight:600; color:var(--muted-2)}
+  .col .dl{font-size:10px; color:var(--muted-2); font-weight:600; line-height:1.3; text-align:center}
+  .col.today .cnt{color:var(--fg-strong)}
+  .col.today .dl{color:var(--fg-strong)}
+
+  /* ===== 每日复盘列表 ===== */
+  .archive{padding-top:16px}
+  .archive__cap{font-size:11px; color:var(--muted); margin-bottom:10px; padding:0 2px}
+  .entry{background:rgba(255,255,255,0.42); border:1px solid var(--hair); border-radius:var(--r-sub); overflow:hidden; transition:background .16s}
+  .entry:hover{background:rgba(255,255,255,0.58)}
+  .entry.is-today{background:rgba(255,255,255,0.62)}
+  .entry + .entry{margin-top:8px}
+  .entry__head{display:flex; align-items:center; gap:11px; padding:11px 13px; cursor:pointer; user-select:none}
+  .entry__date{flex:none; width:72px}
+  .entry__date b{display:block; font-family:var(--num); font-size:13px; font-weight:700; color:var(--fg-strong); font-variant-numeric:tabular-nums; line-height:1.1}
+  .entry__date span{font-size:10px; color:var(--muted)}
+  .entry__mid{flex:1; min-width:0}
+  .entry__hi{font-size:12px; color:var(--fg); font-weight:500; line-height:1.35; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .entry__rate{font-family:var(--num); font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; flex:none}
+  .entry__rate b{color:var(--fg-strong)}
+  .entry__chev{color:var(--muted-2); flex:none; transition:transform .2s ease}
+  .entry__chev svg{width:14px;height:14px; display:block}
+  .entry.open .entry__chev{transform:rotate(90deg)}
+  .entry__body{max-height:0; overflow:hidden; transition:max-height .35s ease}
+  .entry.open .entry__body{max-height:420px}
+  .entry__inner{padding:2px 13px 13px; border-top:1px solid var(--hair-2)}
+  .entry__inner .blk{padding:10px 0; border-bottom:1px solid var(--hair-2)}
+  .entry__inner .blk:last-child{border-bottom:none}
+  .entry__inner .blk .h{font-size:9.5px; font-weight:700; color:var(--muted); letter-spacing:.04em; margin-bottom:5px}
+  .entry__inner .li{font-size:11.5px; color:var(--fg); line-height:1.55; padding:2px 0; display:flex; gap:8px}
+  .entry__inner .li .mk{color:var(--success); flex:none}
+  .entry__inner .li.miss .mk{color:var(--warn-ink)}
+  .entry__inner .li b{color:var(--fg-strong); font-weight:600}
+
+  .pill{display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:600; padding:3px 8px; border-radius:var(--r-pill); line-height:1.4; white-space:nowrap}
+  .pill--now{color:var(--accent-ink); background:var(--accent-soft)}
+  .pill--rest{color:var(--muted); background:rgba(120,116,140,0.13)}
+
+  .btn{font-family:var(--font); font-size:11.5px; font-weight:600; border-radius:var(--r-btn); padding:9px 14px; border:1px solid transparent; cursor:pointer; transition:background .16s, transform .1s; display:inline-flex; align-items:center; gap:6px}
+  .btn--primary{background:var(--accent); color:#fff; box-shadow:0 6px 14px -6px var(--accent); flex:1; justify-content:center}
+  .btn--primary:hover{background:var(--accent-strong)}
+  .btn--primary:active{transform:translateY(1px)}
+  .btn--ghost{background:var(--card-2); color:var(--fg); border-color:var(--hair); text-decoration:none}
+  .btn--ghost:hover{background:#fff}
+  /* a11y / 状态打磨 */
+  :focus{outline:none}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .btn--primary:active{transform:translateY(1px)}
+</style>
+</head>
+<body>
+<div class="page">
+  <main class="panel" aria-label="历史复盘">
+    <header class="panel__head">
+      <a class="back" href="dock.html">← 返回 Dock</a>
+      <div class="panel__title">历史复盘</div>
+      <div class="panel__sub">按日期归档的每日复盘</div>
+    </header>
+
+    <div class="panel__body">
+
+      <!-- 编辑式总览 -->
+      <section class="overview" aria-label="本周总览">
+        <div class="ov__hero">
+          <div class="ov__big">19<small>/42</small></div>
+          <div class="ov__cap">本周已完成，完成率 <b>45%</b>，连续 <b>6 天</b></div>
+        </div>
+        <div class="ov__inline">
+          <div class="m"><b>11</b><span>AI 协作（项）</span></div>
+          <div class="m"><b>8h 24m</b><span>总专注</span></div>
+          <div class="m"><b>1h 12m</b><span>日均专注</span></div>
+        </div>
+      </section>
+
+      <!-- 趋势 -->
+      <section class="trend" aria-label="近 7 天完成趋势">
+        <div class="trend__cap"><span>近 7 天每日完成数</span><span>今天 <b>3</b></span></div>
+        <div class="chart">
+          <div class="col"><div class="cnt">5</div><div class="bar" style="height:71%"></div><div class="dl">一<br>06/08</div></div>
+          <div class="col"><div class="cnt">4</div><div class="bar" style="height:57%"></div><div class="dl">二<br>06/09</div></div>
+          <div class="col"><div class="cnt">3</div><div class="bar" style="height:43%"></div><div class="dl">三<br>06/10</div></div>
+          <div class="col rest"><div class="cnt">0</div><div class="bar" style="height:6%"></div><div class="dl">四<br>06/11</div></div>
+          <div class="col"><div class="cnt">4</div><div class="bar" style="height:57%"></div><div class="dl">五<br>06/12</div></div>
+          <div class="col rest"><div class="cnt">0</div><div class="bar" style="height:6%"></div><div class="dl">六<br>06/13</div></div>
+          <div class="col today"><div class="cnt">3</div><div class="bar" style="height:43%"></div><div class="dl">日<br>06/14</div></div>
+        </div>
+      </section>
+
+      <!-- 每日复盘列表 -->
+      <section class="archive" aria-label="每日复盘">
+        <div class="archive__cap">每日复盘</div>
+
+        <div class="entry is-today open" data-entry>
+          <div class="entry__head">
+            <div class="entry__date"><b>06/14</b><span>今天 · 周日</span></div>
+            <div class="entry__mid"><div class="entry__hi">整理 OpenDesign 提示词已归档，SeeAgent 拆解执行中</div></div>
+            <span class="pill pill--now">进行中</span>
+            <span class="entry__rate"><b>3</b>/8</span>
+            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          </div>
+          <div class="entry__body"><div class="entry__inner">
+            <div class="blk"><div class="h">完成事项</div>
+              <div class="li"><span class="mk">✓</span><span>整理 OpenDesign 产品原型提示词，<b>已归档</b></span></div>
+              <div class="li"><span class="mk">✓</span><span>晨间计划整理，派 2 件给 AI</span></div>
+              <div class="li"><span class="mk">✓</span><span>整理桌面悬浮 AI 面板需求，进度 <b>62%</b></span></div>
+            </div>
+            <div class="blk"><div class="h">未完成与原因</div>
+              <div class="li miss"><span class="mk">·</span><span><b>SeeAgent 开发计划拆解</b>，深度任务，需要整块专注时间</span></div>
+              <div class="li miss"><span class="mk">·</span><span><b>SRAM-CIM Figure 5</b>，被导师邮件打断，延迟 12 min</span></div>
+            </div>
+            <div class="blk"><div class="h">明日建议</div>
+              <div class="li"><span class="mk">→</span><span>SeeAgent 原型设计提前到上午；论文精读挪到 10:00 前。</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="entry" data-entry>
+          <div class="entry__head">
+            <div class="entry__date"><b>06/13</b><span>昨天 · 周六</span></div>
+            <div class="entry__mid"><div class="entry__hi">见 Agent 原型主流程定稿，论文 Figure 4 精读完成</div></div>
+            <span class="entry__rate"><b>4</b>/7</span>
+            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          </div>
+          <div class="entry__body"><div class="entry__inner">
+            <div class="blk"><div class="h">完成事项</div>
+              <div class="li"><span class="mk">✓</span><span>见 Agent 原型主流程定稿，3 个核心界面</span></div>
+              <div class="li"><span class="mk">✓</span><span>SRAM-CIM Figure 4 精读，能耗对比表整理</span></div>
+              <div class="li"><span class="mk">✓</span><span>提示词体系 v2 草稿评审</span></div>
+            </div>
+            <div class="blk"><div class="h">明日建议</div>
+              <div class="li"><span class="mk">→</span><span>把 Figure 5 提前，避免下午被打断。</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="entry" data-entry>
+          <div class="entry__head">
+            <div class="entry__date"><b>06/12</b><span>周五</span></div>
+            <div class="entry__mid"><div class="entry__hi">见 Agent 调度引擎骨架通过，AI 协作 3 项</div></div>
+            <span class="entry__rate"><b>4</b>/6</span>
+            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          </div>
+          <div class="entry__body"><div class="entry__inner">
+            <div class="blk"><div class="h">完成事项</div>
+              <div class="li"><span class="mk">✓</span><span>调度引擎骨架，单测通过</span></div>
+              <div class="li"><span class="mk">✓</span><span>Agent 沙箱接口定义</span></div>
+            </div>
+            <div class="blk"><div class="h">未完成与原因</div>
+              <div class="li miss"><span class="mk">·</span><span><b>状态持久化</b>，等待同步方案决策</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="entry" data-entry>
+          <div class="entry__head">
+            <div class="entry__date"><b>06/11</b><span>周四</span></div>
+            <div class="entry__mid"><div class="entry__hi">休息日，全天未安排任务</div></div>
+            <span class="pill pill--rest">休息</span>
+            <span class="entry__rate"><b>0</b>/5</span>
+            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          </div>
+          <div class="entry__body"><div class="entry__inner">
+            <div class="blk"><div class="h">备注</div>
+              <div class="li"><span class="mk">·</span><span>主动休息日，连续打卡重置提示已忽略。</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="entry" data-entry>
+          <div class="entry__head">
+            <div class="entry__date"><b>06/10</b><span>周三</span></div>
+            <div class="entry__mid"><div class="entry__hi">提示词体系 v2 起草，完成 3/6</div></div>
+            <span class="entry__rate"><b>3</b>/6</span>
+            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          </div>
+          <div class="entry__body"><div class="entry__inner">
+            <div class="blk"><div class="h">完成事项</div>
+              <div class="li"><span class="mk">✓</span><span>提示词体系 v2 起草，6 类</span></div>
+              <div class="li"><span class="mk">✓</span><span>论文 Figure 1-3 复习</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="entry" data-entry>
+          <div class="entry__head">
+            <div class="entry__date"><b>06/09</b><span>周二</span></div>
+            <div class="entry__mid"><div class="entry__hi">完成 SRAM-CIM Figure 1-3 精读，AI 协作 2 项</div></div>
+            <span class="entry__rate"><b>4</b>/6</span>
+            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          </div>
+          <div class="entry__body"><div class="entry__inner">
+            <div class="blk"><div class="h">完成事项</div>
+              <div class="li"><span class="mk">✓</span><span>SRAM-CIM Figure 1-3 精读，笔记 9 条</span></div>
+              <div class="li"><span class="mk">✓</span><span>见 Agent 需求清单整理</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="entry" data-entry>
+          <div class="entry__head">
+            <div class="entry__date"><b>06/08</b><span>周一</span></div>
+            <div class="entry__mid"><div class="entry__hi">本周启动，见 Agent 需求评审，完成 5/7</div></div>
+            <span class="entry__rate"><b>5</b>/7</span>
+            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+          </div>
+          <div class="entry__body"><div class="entry__inner">
+            <div class="blk"><div class="h">完成事项</div>
+              <div class="li"><span class="mk">✓</span><span>见 Agent 需求评审，4 个核心场景</span></div>
+              <div class="li"><span class="mk">✓</span><span>本周计划制定，派 6 件给 AI</span></div>
+            </div>
+          </div></div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <footer class="panel__foot">
+      <button class="btn btn--primary" id="export">导出本周复盘</button>
+      <a class="btn btn--ghost" href="dock.html">回到今天</a>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('[data-entry]').forEach(en=>{
+    en.querySelector('.entry__head').addEventListener('click',()=>en.classList.toggle('open'));
+  });
+  document.getElementById('export').addEventListener('click',()=>{
+    function toast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'fixed',left:'50%',bottom:'28px',transform:'translateX(-50%)',background:'rgba(34,36,54,0.92)',color:'#fff',fontFamily:'inherit',fontSize:'12px',fontWeight:'500',padding:'9px 14px',borderRadius:'12px',boxShadow:'0 14px 32px -10px rgba(40,42,80,0.45)',zIndex:'60',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.12)',opacity:'0',transition:'opacity .25s, transform .25s'});document.body.appendChild(t);requestAnimationFrame(()=>t.style.opacity='1');setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';setTimeout(()=>t.remove(),300)},2000)}
+    toast('已导出本周复盘 recap-06-08_06-14.md');
+  });
+})();
+</script>
+</body>
+</html>

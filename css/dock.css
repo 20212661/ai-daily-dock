@@ -1,0 +1,229 @@
+/* ============================================================
+   AI Daily Dock · 公共基础
+   视觉语言：暖羊皮纸编辑风 + 轻像素点缀
+   tokens / reset / 画布背景 / 面板外壳 / 返回链 / reduced-motion
+   所有页面 <link> 此文件；主 Dock 用 .canvas/.widget，配套页用 .page/.panel
+   ============================================================ */
+
+:root{
+  /* —— 纸面（暖羊皮纸，低饱和、克制）—— */
+  --paper:     #f5f4ed;   /* 主背景 */
+  --paper-2:   #efede3;   /* 略深：表头 / 分区底 */
+  --paper-3:   #e7e4d8;   /* 更深：嵌套 / 分隔 */
+  --card:      #fbfaf4;   /* 卡片正面（比纸面略净亮）*/
+  --card-2:    #f3f1e7;   /* 卡片次级 / 悬停底 */
+
+  /* —— 墨蓝主强调 —— */
+  --ink:        #1B365D;
+  --ink-strong: #142844;
+  --ink-soft:   rgba(27,54,93,0.10);   /* tint 底 */
+  --ink-line:   rgba(27,54,93,0.16);
+
+  /* —— 文字 —— */
+  --fg:        #2a2a26;
+  --fg-strong: #18181a;
+  --muted:     #6c6b62;
+  --muted-2:   #8d8c81;
+
+  /* —— 发丝边线 —— */
+  --hair:   rgba(27,54,93,0.14);
+  --hair-2: rgba(0,0,0,0.06);
+
+  /* —— 语义色：统一降饱和，往编辑 / 复古靠 —— */
+  --success:      #4f7d5f;
+  --success-soft: rgba(79,125,95,0.14);
+  --warn:         #b5853a;
+  --warn-ink:     #8a6322;
+  --warn-soft:    rgba(181,133,58,0.16);
+  --danger:       #9e4a3c;
+  --danger-soft:  rgba(158,74,60,0.14);
+  --info:         var(--ink);
+  --info-ink:     var(--ink-strong);
+  --info-soft:    var(--ink-soft);
+
+  /* 兼容旧引用：accent 统一指向墨蓝 */
+  --accent:        var(--ink);
+  --accent-strong: var(--ink-strong);
+  --accent-soft:   var(--ink-soft);
+  --accent-ink:    var(--ink-strong);
+
+  /* 玻璃已弃用，仅留别名防止旧引用崩（指向纸面卡片）*/
+  --glass-1: var(--card);
+
+  /* —— 圆角：编辑风，略收窄，更「纸 / 工具」—— */
+  --r-xs:5px; --r-ctl:7px; --r-btn:8px; --r-sub:10px; --r-card:12px; --r-panel:16px; --r-pill:999px;
+
+  /* —— 间距阶梯 —— */
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px;
+
+  /* —— 阴影：轻、柔、冷蓝墨（替代原紫灰玻璃阴影）—— */
+  --sh-card:  0 1px 0 rgba(255,255,255,0.7) inset, 0 1px 2px rgba(27,54,93,0.05), 0 6px 14px -10px rgba(27,54,93,0.14);
+  --sh-raise: 0 1px 0 rgba(255,255,255,0.8) inset, 0 2px 4px rgba(27,54,93,0.07), 0 14px 24px -16px rgba(27,54,93,0.18);
+  --sh-panel: 0 1px 0 rgba(255,255,255,0.85) inset, 0 2px 6px rgba(27,54,93,0.07), 0 18px 36px -22px rgba(27,54,93,0.20), 0 36px 60px -42px rgba(27,54,93,0.14);
+  --sh-drag:  0 1px 0 rgba(255,255,255,0.9) inset, 0 4px 10px rgba(27,54,93,0.10), 0 30px 60px -24px rgba(27,54,93,0.26);
+  --sh-drawer:0 1px 0 rgba(255,255,255,0.9) inset, 0 4px 12px rgba(27,54,93,0.10), 0 40px 80px -30px rgba(27,54,93,0.30);
+
+  /* —— 字体：单一衬线（正文 / 标题，高级排印）；数字用等宽带轻微复古数显感 —— */
+  --font: 'Iowan Old Style','Hoefler Text','Apple Garamond',Cambria,Georgia,'Source Serif Pro','Times New Roman',serif;
+  --num:  'SFMono-Regular',ui-monospace,'JetBrains Mono','Cascadia Code',Menlo,Consolas,monospace;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--font); color:var(--fg); -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility; min-height:100vh;
+  background-color:var(--paper);
+  /* 极淡纸纹：内联 SVG 噪点（灰度、~4% 不透明度），CSP 允许 data: */
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-attachment:fixed;
+}
+
+/* ===== 面板外壳（配套页通用）—— 实心纸面卡片，去玻璃拟态 ===== */
+.page{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 24px 60px}
+.panel{width:600px; max-width:100%; max-height:88vh; background:var(--card);
+  border:1px solid var(--hair); border-radius:var(--r-panel); box-shadow:var(--sh-panel);
+  display:flex; flex-direction:column; overflow:hidden}
+.panel__head{padding:18px 22px 16px; border-bottom:1px solid var(--hair-2); background:var(--paper-2)}
+.panel__title{font-size:20px; font-weight:700; color:var(--fg-strong); letter-spacing:-.01em; line-height:1.15}
+.panel__sub{font-size:12.5px; color:var(--muted); margin-top:4px}
+.panel__body{flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; scrollbar-width:thin; scrollbar-color:rgba(27,54,93,.22) transparent}
+.panel__body::-webkit-scrollbar{width:8px}
+.panel__body::-webkit-scrollbar-thumb{background:rgba(27,54,93,.2); border-radius:8px; border:2px solid transparent; background-clip:padding-box}
+.panel__foot{display:flex; gap:8px; padding:13px 18px; border-top:1px solid var(--hair-2); background:var(--paper-2)}
+.back{font-size:12px; font-weight:600; color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; gap:5px; margin-bottom:10px; transition:color .15s}
+.back:hover{color:var(--ink)}
+
+/* —— 像素数字点缀：等宽 + 等宽字距 + 极轻硬阴影，复古数显感（只用于关键数字，不承担正文）—— */
+.pixel-num{font-family:var(--num); font-variant-numeric:tabular-nums; letter-spacing:.05em; text-shadow:0 1px 0 var(--paper-3)}
+
+@media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
+
+/* ============================================================
+   白板组件（融合自 Sticky Flowchart · 羊皮纸重皮）
+   画布 / 任务卡 / 连线 / 端口 / 状态芯片 / 连线控制条
+   全部沿用上面既有 token，不引入新颜色。
+   ============================================================ */
+
+/* —— 画布：羊皮纸 + 极淡墨蓝栅格 + 内联纸纹 —— */
+.board{position:absolute; left:0; right:0; top:var(--header-h); bottom:var(--footer-h);
+  overflow:auto; -webkit-app-region:no-drag;
+  background:
+    linear-gradient(rgba(27,54,93,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(27,54,93,.045) 1px, transparent 1px),
+    radial-gradient(1100px 700px at 26% 6%, var(--card), var(--paper));
+  background-size:36px 36px, 36px 36px, 100% 100%;}
+.board::-webkit-scrollbar{width:10px; height:10px}
+.board::-webkit-scrollbar-thumb{background:rgba(27,54,93,.2); border-radius:8px; border:2px solid transparent; background-clip:padding-box}
+.inner{position:relative; width:2400px; height:1500px}
+
+/* —— 连线层 —— */
+.links{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible}
+.links .hit{pointer-events:stroke; cursor:pointer}
+.links path.draw-in{stroke-dasharray:1; stroke-dashoffset:1; animation:drawin .4s cubic-bezier(.22,.61,.36,1) forwards}
+@keyframes drawin{to{stroke-dashoffset:0}}
+#temp-line{pointer-events:none}
+
+/* —— 任务卡（便利贴 → 羊皮纸卡片）—— */
+.sticky{position:absolute; width:200px; min-height:172px;
+  padding:13px 14px 30px; border-radius:var(--r-card);
+  background:var(--card); border:1px solid var(--hair);
+  box-shadow:var(--sh-card); cursor:grab; user-select:none; touch-action:none;
+  transition:box-shadow .18s ease, transform .04s;}
+.sticky:hover{box-shadow:var(--sh-raise)}
+.sticky:active{cursor:grabbing}
+.sticky.dragging{box-shadow:var(--sh-drag); z-index:50}
+.sticky.linking-target{outline:2px dashed var(--accent); outline-offset:4px}
+.sticky.selected{outline:2px solid var(--accent); outline-offset:3px}
+/* 状态语义：左竖条（克制 tint）+ 芯片；卡片本体不分色 */
+.sticky::after{content:''; position:absolute; left:0; top:10px; bottom:10px; width:4px; border-radius:0 3px 3px 0; background:var(--muted-2); opacity:.7}
+.sticky[data-status="inbox"]::after{background:var(--warn); opacity:.55}
+.sticky[data-status="planning"]::after{background:var(--accent); opacity:.5}
+.sticky[data-status="ai"]::after{background:var(--info); opacity:.55}
+.sticky[data-status="manual"]::after{background:var(--danger); opacity:.5}
+.sticky[data-status="today"]::after{background:var(--accent-strong); opacity:.6}
+.sticky[data-status="done"]::after{background:var(--success); opacity:.6}
+.sticky[data-status="blocked"]::after{background:var(--muted-2); opacity:.7}
+/* 胶带：墨蓝纸胶带 + 像素点缀 */
+.sticky::before{content:''; position:absolute; top:-9px; left:50%;
+  transform:translateX(-50%) rotate(-2.5deg);
+  width:74px; height:17px; border-radius:1px;
+  background:var(--ink-soft);
+  background-image:repeating-linear-gradient(115deg, rgba(27,54,93,.16) 0 4px, transparent 4px 9px);
+  box-shadow:0 1px 3px rgba(27,54,93,.14)}
+.sticky .num{font-family:var(--num); font-weight:700; font-size:18px; line-height:1; color:var(--accent-ink); opacity:.85; outline:none}
+.sticky .t{font-family:var(--font); font-weight:700; font-size:16px; line-height:1.25; color:var(--fg-strong); margin:5px 0 0; outline:none; word-break:break-word}
+.sticky .d{font-family:var(--font); font-size:12.5px; line-height:1.45; color:var(--muted); margin-top:6px; outline:none; word-break:break-word}
+.sticky .meta{display:flex; align-items:center; gap:6px; margin-top:9px;
+  font-family:var(--num); font-size:10.5px; letter-spacing:.02em; color:var(--muted)}
+.sticky .meta i{font-style:normal; opacity:.5}
+.sticky .meta [contenteditable]{outline:none; padding:1px 4px; border-radius:4px; min-width:14px; color:var(--fg)}
+.sticky .meta [contenteditable]:focus{box-shadow:inset 0 0 0 1.5px var(--ink-line)}
+[contenteditable][data-ph]:empty:before{content:attr(data-ph); opacity:.4}
+/* 状态芯片（左下，点击循环） */
+.sticky .status{position:absolute; left:12px; bottom:9px;
+  border:1px solid var(--hair); background:var(--card-2); color:var(--fg);
+  font-family:var(--num); font-size:10px; letter-spacing:.04em; font-weight:600;
+  padding:3px 8px; border-radius:var(--r-pill); line-height:1.4; cursor:pointer; white-space:nowrap;
+  transition:background .12s, transform .1s}
+.sticky .status:hover{background:var(--card)}
+.sticky .status:active{transform:translateY(1px)}
+.sticky .status[data-status="inbox"]{color:var(--warn-ink)}
+.sticky .status[data-status="planning"]{color:var(--accent-ink)}
+.sticky .status[data-status="ai"]{color:var(--info-ink)}
+.sticky .status[data-status="manual"]{color:var(--danger)}
+.sticky .status[data-status="today"]{color:var(--accent-ink)}
+.sticky .status[data-status="done"]{color:var(--success)}
+.sticky .status[data-status="blocked"]{color:var(--muted)}
+/* Agent 徽标（右上角，派活后出现） */
+.sticky .agent-flag{position:absolute; top:8px; right:32px;
+  font-family:var(--num); font-size:9px; font-weight:700; letter-spacing:.03em;
+  padding:2px 6px; border-radius:var(--r-pill); background:var(--info-soft); color:var(--info-ink);
+  display:inline-flex; align-items:center; gap:4px}
+.sticky .agent-flag .pd{width:5px; height:5px; border-radius:50%; background:var(--info)}
+/* 删除 / 端口 */
+.sticky .del,.sticky .port{opacity:0; transition:opacity .15s}
+.sticky:hover .del,.sticky:hover .port{opacity:1}
+.del{position:absolute; top:7px; right:7px; width:19px; height:19px; border:0; border-radius:50%;
+  background:var(--ink-soft); color:var(--fg-strong); cursor:pointer; font-size:11px; line-height:1; display:grid; place-items:center}
+.del:hover{background:var(--danger); color:#fff}
+.port{position:absolute; right:-7px; top:50%; transform:translateY(-50%); width:15px; height:15px; border-radius:50%;
+  background:var(--ink); border:2.5px solid var(--card); cursor:crosshair; box-shadow:0 1px 3px rgba(27,54,93,.3)}
+.port:hover{transform:translateY(-50%) scale(1.28)}
+.port.active{background:var(--accent); animation:pulse 1.1s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(27,54,93,.5)} 50%{box-shadow:0 0 0 8px rgba(27,54,93,0)}}
+
+/* —— 连线控制条 —— */
+.link-ctl{position:absolute; transform:translate(-50%,-50%); display:flex; gap:5px;
+  background:var(--card); border:1px solid var(--hair); border-radius:var(--r-ctl); padding:5px;
+  box-shadow:var(--sh-raise); z-index:40}
+.link-ctl button{font-family:var(--num); font-size:10.5px; padding:4px 9px; border-radius:6px;
+  border:1px solid var(--hair); background:var(--card); cursor:pointer; color:var(--fg)}
+.link-ctl button:hover{background:var(--card-2)}
+.link-ctl button.on{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.link-ctl button.danger{color:var(--danger); border-color:var(--danger-soft)}
+
+/* —— 画布顶/底栏（在 dock.html #ex 内嵌的白板控件）—— */
+.bhead{display:flex; align-items:center; gap:8px; padding:8px 12px;
+  border-bottom:1px solid var(--hair-2); background:var(--paper-2)}
+.bhead .cap{font-family:var(--num); font-size:11px; letter-spacing:.12em; color:var(--muted);
+  outline:none; min-width:120px; padding:3px 6px; border-radius:5px; border:1px dashed transparent}
+.bhead .cap:hover{border-color:var(--hair)}
+.bhead .cap:focus{color:var(--fg-strong); border-color:var(--ink-line); border-style:solid}
+.bhead .spacer{flex:1}
+.bfoot{display:flex; align-items:center; justify-content:space-between; padding:6px 12px;
+  border-top:1px solid var(--hair-2); background:var(--paper-2);
+  font-family:var(--num); font-size:10.5px; letter-spacing:.06em; color:var(--muted)}
+.bfoot .stat b{color:var(--fg-strong); font-weight:600}
+.bfoot #saved{color:var(--success)}
+.bfoot .mini{display:flex; gap:4px}
+.bfoot .mini button{font-family:var(--font); font-size:10.5px; font-weight:600; color:var(--muted);
+  background:transparent; border:1px solid var(--hair); border-radius:var(--r-ctl); padding:4px 8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px}
+.bfoot .mini button:hover{color:var(--fg-strong); background:var(--card)}
+.bfoot .mini button svg{width:12px; height:12px}
+
+/* —— 空状态 —— */
+.empty{position:absolute; left:340px; top:200px; text-align:left; pointer-events:none; max-width:520px}
+.empty h2{font-family:var(--font); font-size:30px; color:var(--ink); opacity:.4; margin:0; line-height:1.1}
+.empty p{font-family:var(--font); font-size:14px; line-height:1.6; color:var(--muted); margin:10px 0 0}
+.empty .kbd{font-family:var(--num); font-size:10.5px; color:var(--fg-strong); background:var(--card-2); border:1px solid var(--hair); padding:2px 6px; border-radius:4px}
