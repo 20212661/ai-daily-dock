@@ -33,6 +33,7 @@
     },
     "files": [
       "main.js",
+      "dataService.js",
       "aiService.js",
       "preload.js",
       "index.html",
@@ -41,7 +42,8 @@
       "agent-detail.html",
       "recap-history.html",
       "css/**/*",
-      "assets/**/*"
+      "assets/**/*",
+      "src/**/*"
     ],
     "win": {
       "target": [

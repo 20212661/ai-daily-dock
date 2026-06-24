@@ -20,15 +20,30 @@ if (platform === 'win32') {
   const shimPath = path.join(shimDir, 'dock.cmd');
   const nodePath = process.execPath;
   const shimContent = `@echo off\r\n"${nodePath}" "${cliPath}" %*\r\n`;
-  
+
+  // 校验 shimDir 是否在 PATH 中：npm 全局目录通常在 PATH，但不保证
+  const pathDirs = (process.env.PATH || '').split(';').map(function (d) { return d.toLowerCase().replace(/\\/g, '\\\\'); });
+  const shimDirNorm = shimDir.toLowerCase().replace(/\\/g, '\\\\');
+  const inPath = pathDirs.indexOf(shimDirNorm) >= 0;
+
   try {
     if (!fs.existsSync(shimDir)) fs.mkdirSync(shimDir, { recursive: true });
     fs.writeFileSync(shimPath, shimContent);
     console.log('✅ 已安装 dock CLI → ' + shimPath);
-    console.log('   确保该目录在 PATH 中。打开新终端后运行 dock help 验证。');
+    if (inPath) {
+      console.log('   该目录已在 PATH 中。打开新终端运行 dock help 验证。');
+    } else {
+      console.warn('⚠️  ' + shimDir + ' 不在 PATH 中，直接运行 dock 会找不到。');
+      console.warn('   两种解决办法（任选其一）：');
+      console.warn('   1) 把该目录加入 PATH（推荐，一劳永逸）');
+      console.warn('   2) 不装 shim，直接用完整路径调用：');
+      console.warn('      "' + shimPath + '" help');
+    }
   } catch (err) {
-    console.error('❌ 安装失败:', err.message);
-    console.log('   可手动创建: dock.cmd 指向 ' + cliPath);
+    console.error('❌ 写入 shim 失败:', err.message);
+    console.log('   可手动创建 dock.cmd，内容为：');
+    console.log('   ' + shimContent.trim());
+    console.log('   或直接用 node 调用：node "' + cliPath + '" help');
   }
 } else {
   // macOS/Linux: 符号链接到 /usr/local/bin

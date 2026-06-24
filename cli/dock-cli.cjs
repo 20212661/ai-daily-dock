@@ -14,14 +14,33 @@
      在 CLI Agent 中执行 shell 命令即可推送任务到 Dock
    ============================================================ */
 const net = require('net');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+// 管道路径与 main.js 一致：按用户隔离
+function currentUserTag() {
+  try { return (os.userInfo && os.userInfo().uid) || process.env.USERNAME || 'user'; }
+  catch (_) { return process.env.USERNAME || 'user'; }
+}
 const PIPE_PATH = process.platform === 'win32'
-  ? '\\\\.\\pipe\\daily-dock-ipc'
-  : '/tmp/daily-dock-ipc.sock';
+  ? '\\\\.\\pipe\\daily-dock-ipc-' + (process.env.USERNAME || 'user')
+  : '/tmp/daily-dock-ipc-' + currentUserTag() + '.sock';
+
+// 读取一次性 token（由主进程启动时写入用户临时目录）
+function tokenFilePath() {
+  return path.join(os.tmpdir(), 'daily-dock-ipc-token-' + currentUserTag());
+}
+function loadToken() {
+  try { return fs.readFileSync(tokenFilePath(), 'utf8').trim(); } catch (_) { return ''; }
+}
 
 function sendToApp(payload) {
   return new Promise((resolve) => {
+    // 附带一次性 token（主进程启动时写入，用于鉴权）
+    const msg = Object.assign({ token: loadToken() }, payload);
     const client = net.createConnection(PIPE_PATH, () => {
-      client.write(JSON.stringify(payload));
+      client.write(JSON.stringify(msg));
     });
     let data = '';
     client.on('data', (chunk) => { data += chunk; });

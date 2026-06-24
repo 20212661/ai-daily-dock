@@ -1,0 +1,17 @@
+{
+  "name": "ai-daily-dock-agent-server",
+  "version": "1.0.0",
+  "description": "Pi SDK 智能分发规划 Agent — 识别任务类型、拆解任务、判断分发对象、生成规划卡片",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

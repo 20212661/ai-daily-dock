@@ -101,11 +101,7 @@
           </div>
         </div>
         <div class="set__row">
-          <div class="k">面板透明度<small>玻璃拟态的通透程度</small></div>
-          <div class="v" style="min-width:200px"><input type="range" min="55" max="100" value="88" id="opacity" aria-label="面板透明度"><span class="rangev" id="opacityV">88%</span></div>
-        </div>
-        <div class="set__row">
-          <div class="k">面板圆角</div>
+          <div class="k">面板圆角<small>（演示）</small></div>
           <div class="v"><div class="seg" data-seg="radius"><button data-v="16">16</button><button data-v="20">20</button><button class="on" data-v="24">24</button></div></div>
         </div>
       </section>
@@ -113,12 +109,13 @@
       <!-- 行为 -->
       <section class="set">
         <div class="set__h">行为</div>
-        <div class="set__row"><div class="k">开机自启<small>登录后自动常驻桌面</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
-        <div class="set__row"><div class="k">常驻置顶<small>始终浮于其他窗口之上</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
-        <div class="set__row"><div class="k">拖拽边缘吸附<small>靠近屏幕边缘自动贴合</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
-        <div class="set__row"><div class="k">双击标题栏复位</div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
-        <div class="set__row"><div class="k">默认专注时长</div><div class="v"><div class="seg" data-seg="focus"><button class="on" data-v="25">25 min</button><button data-v="45">45 min</button><button data-v="60">60 min</button></div></div></div>
-        <div class="set__row"><div class="k">提醒方式</div><div class="v"><div class="seg" data-seg="notify"><button class="on">Toast</button><button class="on">系统通知</button><button>声音</button></div></div></div>
+        <div class="set__row"><div class="k">开机自启<small>登录后自动常驻桌面</small></div><div class="v"><button class="toggle" data-behavior="launchAtLogin" data-tg role="switch" aria-checked="false"></button></div></div>
+        <div class="set__row"><div class="k">常驻置顶<small>始终浮于其他窗口之上</small></div><div class="v"><button class="toggle" data-behavior="alwaysOnTop" data-tg role="switch" aria-checked="false"></button></div></div>
+        <div class="set__row"><div class="k">拖拽边缘吸附<small>靠近屏幕边缘自动贴合（演示）</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
+        <div class="set__row"><div class="k">双击标题栏复位<small>（演示）</small></div><div class="v"><button class="toggle on" data-tg role="switch" aria-checked="true"></button></div></div>
+        <div class="set__row"><div class="k">默认专注时长</div><div class="v"><div class="seg" data-behavior="focusMinutes" data-seg="focus"><button class="on" data-v="25">25 min</button><button data-v="45">45 min</button><button data-v="60">60 min</button></div></div></div>
+        <div class="set__row"><div class="k">面板透明度<small>整窗透明程度</small></div><div class="v" style="min-width:200px"><input type="range" min="55" max="100" value="88" id="opacity" data-behavior="opacity" aria-label="面板透明度"><span class="rangev" id="opacityV">88%</span></div></div>
+        <div class="set__row"><div class="k">提醒方式<small>（演示）</small></div><div class="v"><div class="seg" data-seg="notify"><button class="on">Toast</button><button class="on">系统通知</button><button>声音</button></div></div></div>
       </section>
 
       <!-- AI API 配置 -->
@@ -151,18 +148,15 @@
       <!-- 快捷键 -->
       <section class="set">
         <div class="set__h">快捷键</div>
-        <div class="sc"><span class="k">新建任务</span><span><span class="kbd">⌘</span> <span class="kbd">N</span></span></div>
-        <div class="sc"><span class="k">派活给 AI</span><span><span class="kbd">⌘</span> <span class="kbd">D</span></span></div>
-        <div class="sc"><span class="k">开始 / 暂停专注</span><span><span class="kbd">⌘</span> <span class="kbd">F</span></span></div>
-        <div class="sc"><span class="k">展开 / 折叠面板</span><span><span class="kbd">⌘</span> <span class="kbd">E</span></span></div>
-        <div class="sc"><span class="k">生成今日复盘</span><span><span class="kbd">⌘</span> <span class="kbd">⇧</span> <span class="kbd">R</span></span></div>
-        <div class="sc"><span class="k">打开设置</span><span><span class="kbd">⌘</span> <span class="kbd">,</span></span></div>
+        <div class="sc"><span class="k">唤起 / 隐藏 Dock</span><span><span class="kbd">Alt</span> <span class="kbd">N</span></span></div>
+        <div class="sc"><span class="k">进入白板</span><span><span class="kbd">Alt</span> <span class="kbd">B</span></span></div>
+        <div class="sc"><span class="k">派活给 AI</span><span><span class="kbd">Alt</span> <span class="kbd">A</span></span></div>
       </section>
 
       <!-- 关于 -->
       <section class="set">
         <div class="set__h">关于</div>
-        <div class="about">AI Daily Dock · <b>v0.11.0</b>（2026.06.15）<br>桌面便利贴 + AI 任务调度台 + Agent 执行进度面板。</div>
+        <div class="about">AI Daily Dock · <b>v0.12.0</b><br>桌面便利贴 + AI 任务调度台 + Agent 执行进度面板。</div>
         <div class="set__row" style="border-top:1px solid var(--hair-2);margin-top:10px;padding-top:12px"><div class="k">检查更新</div><div class="v"><button class="btn btn--soft" data-act="update">检查</button></div></div>
       </section>
 
@@ -177,20 +171,95 @@
 
 <script>
 (function(){
-  // toggle
-  document.querySelectorAll('[data-tg]').forEach(t=>t.addEventListener('click',()=>{t.classList.toggle('on'); t.setAttribute('aria-checked', t.classList.contains('on'));}));
-  // segmented (单选)
-  document.querySelectorAll('.seg[data-seg="theme"],.seg[data-seg="radius"],.seg[data-seg="focus"],.seg[data-seg="agent"],.seg[data-seg="risk"]').forEach(seg=>{
+  // toggle（通用 class 切换；behavior 开关额外应用真实 IPC + 持久化）
+  document.querySelectorAll('[data-tg]').forEach(t=>t.addEventListener('click',()=>{
+    t.classList.toggle('on');
+    var on=t.classList.contains('on');
+    t.setAttribute('aria-checked', String(on));
+    var beh=t.dataset.behavior;
+    if(beh==='alwaysOnTop'){
+      BEH_SETTINGS.alwaysOnTop=on;
+      if(window.dock&&window.dock.setAlwaysOnTop) window.dock.setAlwaysOnTop(on);
+      behSave();
+      toast(on?'已开启常驻置顶':'已关闭置顶');
+    } else if(beh==='launchAtLogin'){
+      BEH_SETTINGS.launchAtLogin=on;
+      if(window.dock&&window.dock.setLoginItem) window.dock.setLoginItem(on);
+      behSave();
+      toast(on?'已开启开机自启':'已关闭开机自启');
+    }
+  }));
+  // segmented (单选，纯 UI：theme/radius/agent/risk)
+  document.querySelectorAll('.seg[data-seg="theme"],.seg[data-seg="radius"],.seg[data-seg="agent"],.seg[data-seg="risk"]').forEach(seg=>{
     seg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; seg.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  });
+  // 专注时长 segmented：单选 + 持久化
+  var focSeg=document.querySelector('[data-behavior="focusMinutes"]');
+  if(focSeg) focSeg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    focSeg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    BEH_SETTINGS.focusMinutes=Number(b.dataset.v);
+    behSave();
+    toast('默认专注时长 · '+b.dataset.v+' 分钟');
   });
   // 多选 segmented（提醒方式）
   document.querySelector('.seg[data-seg="notify"]').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; b.classList.toggle('on'); });
   // swatch
   document.querySelectorAll('[data-sw]').forEach(s=>s.addEventListener('click',()=>{ document.querySelectorAll('[data-sw]').forEach(x=>x.classList.remove('on')); s.classList.add('on'); }));
-  // slider
+
+  // —— 行为类设置：加载持久化值 + 变更时即时保存并应用（settings.json）——
+  // 形状：{ alwaysOnTop:bool, opacity:0.55~1, launchAtLogin:bool, focusMinutes:25|45|60 }
+  var BEH_SETTINGS = {}; // 内存中的当前行为设置
+  function behSave(){
+    if(window.dock&&window.dock.data) window.dock.data.save('settings',BEH_SETTINGS);
+  }
+  function loadBehSettings(){
+    if(!window.dock||!window.dock.data){ return; }
+    window.dock.data.load('settings').then(function(r){
+      if(!r||!r.ok||!r.data){ return; }
+      BEH_SETTINGS = r.data || {};
+      // 回填 UI
+      // 开机自启：优先用系统真实状态，否则用存储值
+      var launchToggle = document.querySelector('[data-behavior="launchAtLogin"]');
+      if(launchToggle){
+        if(window.dock.getLoginItem){
+          window.dock.getLoginItem().then(function(li){
+            var on = !!(li&&li.ok&&li.openAtLogin) || !!BEH_SETTINGS.launchAtLogin;
+            setToggle(launchToggle, on);
+          });
+        } else { setToggle(launchToggle, !!BEH_SETTINGS.launchAtLogin); }
+      }
+      setToggle(document.querySelector('[data-behavior="alwaysOnTop"]'), !!BEH_SETTINGS.alwaysOnTop);
+      // 透明度
+      var opEl=document.getElementById('opacity'), opvEl=document.getElementById('opacityV');
+      if(opEl&&typeof BEH_SETTINGS.opacity==='number'){
+        opEl.value=Math.round(BEH_SETTINGS.opacity*100);
+        if(opvEl) opvEl.textContent=opEl.value+'%';
+      }
+      // 专注时长
+      var focSeg=document.querySelector('[data-behavior="focusMinutes"]');
+      if(focSeg&&BEH_SETTINGS.focusMinutes){
+        focSeg.querySelectorAll('button').forEach(function(btn){
+          btn.classList.toggle('on', Number(btn.dataset.v)===Number(BEH_SETTINGS.focusMinutes));
+        });
+      }
+    });
+  }
+  function setToggle(el,on){ if(!el)return; el.classList.toggle('on',!!on); el.setAttribute('aria-checked',String(!!on)); }
+  loadBehSettings();
+
+  // 透明度 slider：实时应用 + 防抖保存
   const op=document.getElementById('opacity'), opv=document.getElementById('opacityV');
-  op.addEventListener('input',()=>opv.textContent=op.value+'%');
-  // stepper
+  var opSaveTimer=null;
+  op.addEventListener('input',()=>{
+    opv.textContent=op.value+'%';
+    var v=Number(op.value)/100;
+    if(window.dock&&window.dock.setOpacity) window.dock.setOpacity(v);
+    BEH_SETTINGS.opacity=v;
+    clearTimeout(opSaveTimer); opSaveTimer=setTimeout(behSave,400);
+  });
+  // stepper（Agent 参数，演示态）
   document.querySelectorAll('.stepper').forEach(sp=>{
     const min=+sp.dataset.min, max=+sp.dataset.max, unit=sp.querySelector('b').textContent.replace(/[0-9 ]/g,'');
     let val=+sp.dataset.sp;
@@ -301,10 +370,25 @@
   document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{
     const a=b.dataset.act;
     if(a==='restore') toast('已还原默认设置（演示）');
-    else if(a==='export') toast('已导出本周数据 · daily-dock-week.json');
-    else if(a==='cache') toast('已清空本地缓存 · 释放 2.3 MB');
-    else if(a==='reset') toast('已重置三态面板到默认位置');
-    else if(a==='update') toast('已是最新版本 · v0.11.0');
+    else if(a==='export'){
+      // 真实导出：调主进程 data:export，下载 JSON
+      if(window.dock&&window.dock.data&&window.dock.data.exportAll){
+        window.dock.data.exportAll().then(function(r){
+          if(r&&r.ok&&r.data){
+            var blob=new Blob([JSON.stringify(r.data,null,2)],{type:'application/json'});
+            var url=URL.createObjectURL(blob);
+            var a2=document.createElement('a');
+            a2.href=url; a2.download='ai-daily-dock-backup-'+new Date().toISOString().slice(0,10)+'.json';
+            document.body.appendChild(a2); a2.click(); a2.remove();
+            URL.revokeObjectURL(url);
+            toast('已导出全部数据 · JSON 备份');
+          } else { toast('导出失败：'+(r&&r.error||''),'err'); }
+        });
+      } else { toast('需在 Electron 中运行','err'); }
+    }
+    else if(a==='cache') toast('已清空本地缓存（演示）');
+    else if(a==='reset') toast('已重置面板布局（演示）');
+    else if(a==='update') toast('已是最新版本 · v0.12.0');
   }));
   function toast(msg){
     const t=document.createElement('div');

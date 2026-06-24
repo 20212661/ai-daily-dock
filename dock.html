@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -152,6 +152,14 @@
   .sendbtn{width:31px;height:31px;border-radius:var(--r-ctl);border:none;background:var(--accent);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none;transition:.16s}
   .sendbtn:hover{background:var(--accent-strong); transform:translateY(-1px)}
   .sendbtn svg{width:15px;height:15px}
+  /* 快速添加今日任务输入框 */
+  .quickadd{display:flex; align-items:center; gap:7px; margin-bottom:10px; padding:5px 7px; border:1px solid var(--hair); border-radius:var(--r-sub); background:var(--card-2); transition:border-color .16s}
+  .quickadd:focus-within{border-color:var(--accent)}
+  .quickadd input{flex:1; min-width:0; border:none; background:transparent; outline:none; font-family:var(--font); font-size:12.5px; color:var(--fg-strong); padding:6px 2px}
+  .quickadd input::placeholder{color:var(--muted-2)}
+  .quickadd__btn{width:26px; height:26px; border-radius:var(--r-ctl); border:none; background:var(--accent); color:#fff; display:grid; place-items:center; cursor:pointer; flex:none; transition:.16s}
+  .quickadd__btn:hover{background:var(--accent-strong)}
+  .quickadd__btn svg{width:14px; height:14px}
   .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
   .chip{font-size:10.5px; font-weight:600; color:var(--muted); background:var(--card); border:1px solid var(--hair); padding:5px 9px; border-radius:var(--r-pill); cursor:pointer; transition:.16s; display:inline-flex; align-items:center; gap:4px}
   .chip:hover{color:var(--accent-ink); border-color:var(--accent); background:var(--card)}
@@ -347,16 +355,20 @@
   .drawer__body{padding:16px 18px; display:flex; flex-direction:column; gap:18px}
   .drawer__h{font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.06em; margin-bottom:9px; display:flex; align-items:center; gap:5px}
   .steps{position:relative}
-  .step{display:grid; grid-template-columns:18px 1fr auto; column-gap:10px; align-items:start; padding:5px 0; position:relative}
+  .step{display:grid; grid-template-columns:18px 1fr; column-gap:10px; align-items:start; padding:5px 0; position:relative}
   .step__dot{width:16px;height:16px;border-radius:50%; display:grid; place-items:center; flex:none; margin-top:1px; background:var(--card); border:1.5px solid var(--muted-2)}
   .step--done .step__dot{background:var(--success); border-color:var(--success); color:#fff}
   .step--active .step__dot{background:var(--card); border:1.5px solid var(--info); color:var(--info)}
   .step__dot svg{width:10px;height:10px}
   .step__dot .spinner{width:9px;height:9px; border-width:1.5px}
+  .step__body{display:flex; flex-direction:column; gap:2px; min-width:0}
   .step__txt{font-size:12px; color:var(--fg-strong); font-weight:500; line-height:1.4}
   .step--active .step__txt{color:var(--info-ink); font-weight:600}
   .step--pending .step__txt{color:var(--muted)}
-  .step__time{font-size:10px; color:var(--muted-2); font-family:var(--num); font-variant-numeric:tabular-nums; padding-top:2px}
+  .step__time{font-size:10px; color:var(--muted-2); font-family:var(--num); font-variant-numeric:tabular-nums}
+  .step__result{margin-top:6px; background:var(--info-soft); border:1px solid var(--hair); border-radius:var(--r-sub); padding:9px 10px}
+  .step__result-label{font-size:9px; font-weight:700; color:var(--info-ink); letter-spacing:.04em; display:flex; align-items:center; gap:4px; margin-bottom:5px}
+  .step__result pre{margin:0; white-space:pre-wrap; word-break:break-word; font-family:var(--num); font-size:10.5px; color:var(--fg); line-height:1.65}
   .step:not(:last-child)::before{content:''; position:absolute; left:7.5px; top:21px; bottom:-5px; width:1.5px; background:var(--hair-2)}
   .step--done:not(:last-child)::before{background:var(--success-soft)}
   .drawer__out{background:var(--card-2); border:1px solid var(--hair); border-radius:var(--r-sub); padding:12px 13px; font-size:11.5px; color:var(--fg); line-height:1.55}
@@ -392,8 +404,10 @@
      ========================================================== */
   html,body{height:100%}
   body{margin:0; background:transparent}
-  /* 透明无框窗口：#app 透明 + 内边距留出投影，让圆角面板浮在桌面上 */
-  .daily-dock{display:flex; flex-direction:column; overflow:hidden; box-sizing:border-box; padding:8px; background:transparent; width:100%; height:100%}
+  /* 透明无框窗口：#app 极低透明度背景（rgba(0,0,0,0.01)）+ 内边距留出投影，让圆角面板浮在桌面上。
+     关键：不能用 transparent —— Chromium 透明窗口下，background:transparent 的区域鼠标事件会穿透到桌面，
+     导致拖拽区(.dragbar/.modeswitch)和按钮无法点击。rgba(0,0,0,0.01) 视觉上与透明无异，但不穿透。 */
+  .daily-dock{display:flex; flex-direction:column; overflow:hidden; box-sizing:border-box; padding:8px; background:rgba(0,0,0,0.01); width:100%; height:100%}
   #app[data-mode="compact"]{width:100%; height:100%}
   #app[data-mode="expanded"]{width:100%; height:100%}
   #app[data-mode="board"]{width:100%; height:100%; min-width:600px; min-height:400px}
@@ -656,6 +670,11 @@
             <div class="sec__head">
               <div class="sec__title"><svg><use href="#i-target"/></svg>今日重点<span class="sec__count" id="exTaskCount">0</span></div>
             </div>
+            <!-- 快速添加今日任务：回车即创建一张「今日」任务卡 -->
+            <div class="quickadd">
+              <input id="quickAddInput" type="text" placeholder="记一个今日任务，回车添加…" aria-label="快速添加今日任务" />
+              <button class="quickadd__btn" id="quickAddBtn" title="添加"><svg><use href="#i-plus"/></svg></button>
+            </div>
             <div id="exTaskList"><!-- 由 renderExpandedTasks() 动态渲染 --></div>
           </section>
 
@@ -680,20 +699,15 @@
             </div>
           </section>
 
-          <!-- 交给 AI -->
+          <!-- AI 分发台（智能分发规划 Agent） -->
           <section class="sec sec--ai" data-od-id="ai-dispatch">
-            <div class="sec__head"><div class="sec__title"><svg><use href="#px-bot"/></svg>交给 AI</div><span class="pill pill--ai" style="margin-left:auto"><span class="pd"></span>3 个 Agent 在线</span></div>
+            <div class="sec__head"><div class="sec__title"><svg><use href="#px-bot"/></svg>AI 分发台</div><span class="pill pill--ai" style="margin-left:auto" id="aiAgentPill"><span class="pd"></span>0 个 AI 任务</span></div>
             <div class="aiwrap">
               <span class="ai-ico"><svg><use href="#px-bot"/></svg></span>
-              <input id="aiInput" type="text" placeholder="输入一个想法或任务，让 AI 帮你拆解…" aria-label="派给 AI 的任务或想法" />
-              <button class="sendbtn" id="aiSend" title="发送给 AI"><svg><use href="#i-send"/></svg></button>
+              <input id="aiInput" type="text" placeholder="输入想法或任务，AI 会帮你识别类型并生成分发规划…" aria-label="AI 规划分发" />
+              <button class="sendbtn" id="aiSend" title="AI 规划分发"><svg><use href="#i-send"/></svg></button>
             </div>
-            <div class="chips">
-              <button class="chip" data-prefill="帮我把 SeeAgent 的开发计划拆成今天可以完成的任务"><svg><use href="#i-list"/></svg>拆解任务</button>
-              <button class="chip" data-prefill="把论文笔记归档交给 Agent，写入知识库"><svg><use href="#i-cpu"/></svg>交给 Agent</button>
-              <button class="chip" data-prefill="根据今天的重点，生成一份今日时间安排"><svg><use href="#i-cal"/></svg>生成计划</button>
-              <button class="chip" data-prefill="总结今天的进展，准备今晚复盘"><svg><use href="#i-refresh"/></svg>总结进展</button>
-            </div>
+            <div class="chips" id="aiChips"></div>
           </section>
 
           <!-- AI 工作中（点击卡片看详情） -->
@@ -702,62 +716,14 @@
             <div id="agentList"><!-- 由 renderAgentList() 动态渲染 --></div>
           </section>
 
-          <!-- 时间安排 -->
-          <section class="sec" data-od-id="timeline">
-            <div class="sec__head"><div class="sec__title"><svg><use href="#i-clock"/></svg>时间安排</div></div>
-            <div class="tl">
-              <div class="tl__node is-done">
-                <div class="tl__time">08:30</div><div class="tl__mark"><span class="tl__dot"></span></div>
-                <div class="tl__body"><div class="tl__title"><span class="tk">晨间计划整理</span><span class="pill pill--done"><span class="pd"></span>已完成</span></div><div class="tl__note">整理 3 件重点 · 派 2 件给 AI</div></div>
-              </div>
-              <div class="tl__node is-now">
-                <div class="tl__time">09:30</div><div class="tl__mark"><span class="tl__dot"></span></div>
-                <div class="tl__body"><div class="tl__title"><span>论文精读</span><span class="pill pill--now"><span class="pd"></span>进行中</span></div><div class="tl__note">SRAM-CIM · Figure 5 精读</div></div>
-              </div>
-              <div class="tl__node is-warn">
-                <div class="tl__time">10:30</div><div class="tl__mark"><span class="tl__dot"></span></div>
-                <div class="tl__body"><div class="tl__title"><span>回复导师邮件</span><span class="late">延迟 +12 min</span></div><div class="tl__note">周报草稿已就绪，待发送</div></div>
-              </div>
-              <div class="tl__node">
-                <div class="tl__time">11:00</div><div class="tl__mark"><span class="tl__dot"></span></div>
-                <div class="tl__body"><div class="tl__title"><span>AI Agent 派活检查</span><span class="pill pill--todo"><span class="pd"></span>待开始</span></div><div class="tl__note">确认 Agent 任务输出与确认项</div></div>
-              </div>
-              <div class="tl__node">
-                <div class="tl__time">14:00</div><div class="tl__mark"><span class="tl__dot"></span></div>
-                <div class="tl__body"><div class="tl__title"><span>SeeAgent 原型设计</span><span class="pill pill--todo"><span class="pd"></span>待开始</span></div><div class="tl__note">主交互流程 + 3 个核心界面</div></div>
-              </div>
-              <div class="tl__node">
-                <div class="tl__time">20:30</div><div class="tl__mark"><span class="tl__dot"></span></div>
-                <div class="tl__body"><div class="tl__title"><span>今日复盘</span><span class="pill pill--todo"><span class="pd"></span>待开始</span></div><div class="tl__note">生成复盘 · 规划明日重点</div></div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 灵感 Inbox -->
-          <section class="sec" data-od-id="inbox">
-            <div class="sec__head"><div class="sec__title"><svg><use href="#i-note"/></svg>灵感 Inbox</div></div>
-            <div class="inbox__item" data-inbox>
-              <span class="inbox__ico"><svg><use href="#i-spark"/></svg></span>
-              <div class="inbox__txt">做一个桌面悬浮 AI 工作台</div>
-              <span class="inbox__act js-totask">转为任务</span>
-            </div>
-            <div class="inbox__item" data-inbox>
-              <span class="inbox__ico"><svg><use href="#i-note"/></svg></span>
-              <div class="inbox__txt">把论文精读流程做成 Skill</div>
-              <span class="inbox__act js-totask">转为任务</span>
-            </div>
-          </section>
-
           <!-- 今日复盘 -->
           <section class="sec" data-od-id="recap" id="secRecap">
             <div class="sec__head"><div class="sec__title"><svg><use href="#i-refresh"/></svg>今日复盘</div></div>
             <div class="recap__stats">
-              <div class="recap__stat"><div class="k"><svg style="color:var(--success)"><use href="#i-check2"/></svg>今日完成</div><div class="v pixel-num" id="recapDone">3<small>/8</small></div></div>
-              <div class="recap__stat is-ai"><div class="k"><svg><use href="#i-cpu"/></svg>AI 完成</div><div class="v">2<small> 项</small></div></div>
-              <div class="recap__stat"><div class="k"><svg style="color:var(--accent)"><use href="#i-clock"/></svg>专注时长</div><div class="v">1<small>h</small> 12<small>m</small></div></div>
-              <div class="recap__stat"><div class="k"><svg style="color:var(--warn)"><use href="#i-note"/></svg>待确认</div><div class="v">1<small> 项</small></div></div>
+              <div class="recap__stat"><div class="k"><svg style="color:var(--success)"><use href="#i-check2"/></svg>今日完成</div><div class="v pixel-num" id="recapDone">0<small>/0</small></div></div>
+              <div class="recap__stat is-ai"><div class="k"><svg><use href="#i-cpu"/></svg>AI 协作</div><div class="v" id="recapAI">0<small> 项</small></div></div>
             </div>
-            <div class="recap__advice" id="recapAdvice"><b>明日建议 · </b>把 SeeAgent 原型设计提前到上午，论文精读挪到 10:00 前，AI 派活检查并入晨间。</div>
+            <div class="recap__advice" id="recapAdvice">点击下方按钮生成今日复盘</div>
             <div class="cur__act" style="margin-top:11px">
               <button class="btn btn--primary" id="recapGen" style="flex:1"><svg><use href="#i-refresh"/></svg>生成今日复盘</button>
             </div>
@@ -914,6 +880,13 @@
 
 <div class="toast-wrap" id="toasts"></div>
 
+<!-- ============================================================ -->
+<!-- 拆分模块：taskStore（数据层） / dispatchClient（AI 派活） / renderTasks（UI 渲染） -->
+<script src="src/renderer/js/state/taskStore.js"></script>
+<script src="src/renderer/js/ai/dispatchClient.js"></script>
+<script src="src/renderer/js/ui/renderTasks.js"></script>
+<!-- ============================================================ -->
+
 <script>
 (function(){
   const $ = (s,r=document)=>r.querySelector(s);
@@ -938,6 +911,10 @@
     confirmCb=onConfirm;
     ov.classList.add('is-open');
   }
+
+  // —— 桥接：把 UI 工具函数暴露给外部模块（taskStore/dispatchClient/renderTasks）——
+  window.DOCK = window.DOCK || {};
+  window.DOCK.util = { $:$, $$:$$, esc:esc, toast:toast, confirmDone:confirmDone };
   $('#confirmYes').addEventListener('click',()=>{
     $('#confirmOverlay').classList.remove('is-open');
     if(confirmCb){var cb=confirmCb;confirmCb=null;cb();}
@@ -962,39 +939,30 @@
   /* ============================================================
      统一数据模型：多看板（boards[]），白板 ⇄ 展开 ⇄ 紧凑 共享当前活跃看板
      localStorage key: 'dailyDockTasks:v3'
+     ------------------------------------------------------------
+     已拆分：数据层逻辑在 src/renderer/js/state/taskStore.js
+     这里通过 window.DOCK.store 引用同一 tasks 对象 + 常量，
+     保持 tasks 引用一致性（所有地方读写同一份内存数据）。
      ============================================================ */
-  const TSTORAGE='dailyDockTasks:v3';
-  const TSTATUSES=['inbox','planning','ai','manual','today','done','blocked'];
-  const TLABELS={inbox:'收件',planning:'规划',ai:'AI执行',manual:'人工',today:'今日',done:'完成',blocked:'阻塞'};
-  const TPILL={inbox:{cls:'pill--todo',txt:'收件'},planning:{cls:'pill--todo',txt:'待开始'},ai:{cls:'pill--ai',txt:'AI处理中'},manual:{cls:'pill--todo',txt:'待处理'},today:{cls:'pill--now',txt:'进行中'},done:{cls:'pill--done',txt:'已完成'},blocked:{cls:'pill--need',txt:'阻塞'}};
-  const BNW=172, BNH=130;
-  /*
-    数据结构：
-    tasks = {
-      boards: [
-        { id, name, nodes:[], links:[] },  // 每个看板独立的便利贴和连线
-        ...
-      ],
-      activeBoardId: 'xxx',  // 当前活跃看板
-      // 下面两个是「当前活跃看板」的快捷引用（指向 boards 中对应项）
-      nodes: [], links: []
-    }
-  */
-  let tasks={boards:[],activeBoardId:null,nodes:[],links:[]};
+  const TSTORAGE = window.DOCK.store.consts.TSTORAGE;
+  const TSTATUSES = window.DOCK.store.consts.TSTATUSES;
+  const TLABELS = window.DOCK.store.consts.TLABELS;
+  const TPILL = window.DOCK.store.consts.TPILL;
+  const BNW = window.DOCK.store.consts.BNW, BNH = window.DOCK.store.consts.BNH;
+
+  // tasks 直接引用 taskStore 内部的 state（同一对象，双向同步）
+  let tasks = window.DOCK.store.state;
   let bNodeEls=new Map(), bHistory=[], bSelectedLink=null, bLinkingFrom=null, bDrag=null, bStatusIdx=0, bJustLinked=null;
 
-  function tClone(o){return JSON.parse(JSON.stringify(o));}
-  function tUid(p){return (p||'t')+Math.random().toString(36).slice(2,9);}
-  function tClamp(v,a,b){return Math.max(a,Math.min(b,v));}
-  function tSign(v){return v<0?-1:(v>0?1:0);}
+  // —— 工具函数：委托到 taskStore（保持 tasks 引用一致）——
+  function tClone(o){return window.DOCK.store.clone(o);}
+  function tUid(p){return window.DOCK.store.uid(p);}
+  function tClamp(v,a,b){return window.DOCK.store.clamp(v,a,b);}
+  function tSign(v){return window.DOCK.store.sign(v);}
 
   // —— 看板操作 ——
-  function activeBoard(){return tasks.boards.filter(function(b){return b.id===tasks.activeBoardId;})[0]||null;}
-  function syncActiveRefs(){
-    var b=activeBoard();
-    if(b){tasks.nodes=b.nodes;tasks.links=b.links;}
-    else{tasks.nodes=[];tasks.links=[];}
-  }
+  function activeBoard(){return window.DOCK.store.activeBoard();}
+  function syncActiveRefs(){window.DOCK.store.syncActiveRefs();}
   function switchBoard(id){
     tasks.activeBoardId=id;
     syncActiveRefs();
@@ -1033,22 +1001,15 @@
     if(b){b.name=name;renderBoardSidebar();tSave();}
   }
 
-  // —— 跨项目聚合：获取所有看板的全部节点（扁平数组）——
-  function allNodes(){
-    var arr=[];
-    tasks.boards.forEach(function(b){b.nodes.forEach(function(n){arr.push(n);});});
-    return arr;
-  }
-  function allLinks(){
-    var arr=[];
-    tasks.boards.forEach(function(b){b.links.forEach(function(l){arr.push(l);});});
-    return arr;
-  }
+  // —— 跨项目聚合：委托到 taskStore ——
+  function allNodes(){return window.DOCK.store.allNodes();}
+  function allLinks(){return window.DOCK.store.allLinks();}
 
   // —— 侧边栏渲染 ——
   function renderBoardSidebar(){
     var sidebar=$('#boardSidebar');
     if(!sidebar) return;
+    if(!tasks.boards||!Array.isArray(tasks.boards)){sidebar.innerHTML='';return;}
     var html='';
     tasks.boards.forEach(function(b){
       var isActive=b.id===tasks.activeBoardId;
@@ -1087,240 +1048,36 @@
     if(addBtn) addBtn.addEventListener('click',function(){createBoard('新项目 '+String(tasks.boards.length+1));toast('已创建新项目','#i-board',true);});
   }
 
-  // 保存（统一）
-  var tSaveTimer=null;
-  function tSave(){
-    var bSavedEl=$('#boardSaved'); if(bSavedEl){bSavedEl.textContent='保存中…';bSavedEl.style.color='var(--muted)';}
-    clearTimeout(tSaveTimer); tSaveTimer=setTimeout(function(){
-      // 只保存 boards 和 activeBoardId，不保存冗余的顶层 nodes/links
-      var saveData={boards:tasks.boards,activeBoardId:tasks.activeBoardId};
-      try{localStorage.setItem(TSTORAGE,JSON.stringify(saveData));}catch(e){}
-      if(bSavedEl){bSavedEl.textContent='已保存';bSavedEl.style.color='var(--success)';}
-    },300);
-  }
-  function tPushHistory(){bHistory.push(tClone(tasks));if(bHistory.length>60)bHistory.shift();}
-  // 从 tasks.nodes 中计算 done/total（排除已归档）
-  // 跨所有项目聚合：展开/紧凑模式看到的是全局今日重点
-  function tCounts(){
-    var active=[],done=0;
-    tasks.boards.forEach(function(b){
-      b.nodes.forEach(function(n){
-        if(n.archived) return;
-        if(n.status==='inbox') return;
-        active.push(n);
-        if(n.status==='done') done++;
-      });
-    });
-    return {total:active.length,done:done};
-  }
+  // 保存（统一）：委托到 taskStore
+  function tSave(){window.DOCK.store.save();}
+  function tPushHistory(){window.DOCK.store.pushHistory();}
+  // 统计：委托到 taskStore
+  function tCounts(){return window.DOCK.store.counts();}
 
-  /* ---------- 自动归档：done 状态超过 2 天 → 标记 archived ---------- */
-  var ARCHIVE_DAYS = 2; // 完成 2 天后自动归档
-  var ARCHIVE_MS = ARCHIVE_DAYS * 24 * 60 * 60 * 1000;
+  /* ---------- 自动归档：委托到 taskStore，保留 toast 提示 ---------- */
   function autoArchive(){
-    var now = Date.now();
-    var changed = false;
-    tasks.boards.forEach(function(b){
-      b.nodes.forEach(function(n){
-        if(n.status === 'done' && !n.archived && n.doneAt){
-          var doneTime = new Date(n.doneAt).getTime();
-          if ((now - doneTime) > ARCHIVE_MS) {
-            n.archived = true;
-            changed = true;
-          }
-        }
-        // 如果从 done 改回其他状态，清除归档
-        if(n.archived && n.status !== 'done'){
-          n.archived = false;
-          changed = true;
-        }
-        // 如果从 done 改回其他状态，清除 doneAt
-        if(n.status !== 'done' && n.doneAt){
-          n.doneAt = null;
-        }
-      });
-    });
-    if (changed) {
-      tSave();
-      // 统计归档数
-      var archivedCount = 0;
-      tasks.boards.forEach(function(b){
-        archivedCount += b.nodes.filter(function(n){return n.archived;}).length;
-      });
-      if (archivedCount > 0) {
-        toast('自动归档 · '+archivedCount+' 个已完成任务已移入历史','#i-refresh');
-      }
+    var r=window.DOCK.store.autoArchive();
+    if(r.changed && r.archivedCount>0){
+      toast('自动归档 · '+r.archivedCount+' 个已完成任务已移入历史','#i-refresh');
     }
   }
 
-  /* ---------- 拓扑排序：用白板连线决定任务执行顺序 ----------
-     实线（dashed:false）= 强依赖：B 必须排在 A 之后
-     虚线（dashed:true） = 弱依赖：不强制排序，但标注关系
-     人可以 override：排序只是建议，不阻止你操作任何任务
-  */
+  /* ---------- 拓扑排序：委托到 taskStore ---------- */
   function sortByDependencies(nodes, links){
-    var nodeMap={};nodes.forEach(function(n){nodeMap[n.id]={n:n,deps:[],depDone:true};});
-    // 只用实线（solid）建强依赖；虚线和点线不阻塞
-    links.filter(function(l){var lt=l.linkType||(!l.dashed?'solid':'dashed');return lt==='solid';}).forEach(function(l){
-      if(nodeMap[l.to]) nodeMap[l.to].deps.push(l.from);
-    });
-    // 判断每个任务的实线前置依赖是否全部完成
-    var doneIds={};nodes.filter(function(n){return n.status==='done';}).forEach(function(n){doneIds[n.id]=true;});
-    Object.keys(nodeMap).forEach(function(id){
-      var nd=nodeMap[id];
-      nd.depDone=nd.deps.every(function(d){return doneIds[d];});
-      nd.depNames=nd.deps.map(function(d){var dn=nodes.filter(function(x){return x.id===d;})[0];return dn?dn.title:'';}).filter(function(t){return t;});
-    });
-    // 排序：前置未完成 > 前置已完成（把"可以做的"排前面，但不阻止操作）
-    // 同层内按状态优先级排
-    var statusRank={today:0,planning:1,ai:2,manual:3,blocked:4,done:5,inbox:6};
-    var arr=nodes.map(function(n){return nodeMap[n.id];});
-    arr.sort(function(a,b){
-      // done 永远排最后
-      if(a.n.status==='done'&&b.n.status!=='done')return 1;
-      if(b.n.status==='done'&&a.n.status!=='done')return-1;
-      // 可以做的（前置已完成）排在被阻塞的前面
-      if(a.depDone&&!b.depDone)return-1;
-      if(!a.depDone&&b.depDone)return 1;
-      // 同层按状态优先级
-      var ra=statusRank[a.n.status]||3,rb=statusRank[b.n.status]||3;
-      if(ra!==rb)return ra-rb;
-      return 0;
-    });
-    return arr;
+    return window.DOCK.store.sortByDependencies(nodes, links);
   }
 
-  /* ---------- 展开模式：今日重点列表（按项目分组 + 依赖排序 + 阻塞提示） ---------- */
-  // 跨所有项目查找节点的辅助函数
-  function findNodeAcrossBoards(id){
-    var found=null;
-    tasks.boards.forEach(function(b){
-      if(!found){found=b.nodes.filter(function(n){return n.id===id;})[0];}
-    });
-    return found;
-  }
-  function renderExpandedTasks(){
-    var list=$('#exTaskList'); if(!list) return;
-    // 跨所有项目聚合，按项目分组
-    var groups=[];
-    var allLinks=[];
-    tasks.boards.forEach(function(b){
-      var boardNodes=b.nodes.filter(function(n){return n.status!=='inbox'&&!n.archived;});
-      if(boardNodes.length>0){
-        groups.push({board:b,nodes:boardNodes});
-      }
-      b.links.forEach(function(l){allLinks.push(l);});
-    });
-    var totalShown=groups.reduce(function(s,g){return s+g.nodes.length;},0);
-    if(totalShown===0){
-      list.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.6">还没有今日任务<br>去<b style="color:var(--accent)">白板模式</b>把便利贴状态改为「今日」开始吧</div>';
-      return;
-    }
-    var html='';
-    var globalIdx=0;
-    groups.forEach(function(g){
-      // 项目标题（第一层）
-      html+='<div class="ptask__group" data-board-id="'+g.board.id+'">'
-        +'<span class="ptask__group-icon"><svg style="width:12px;height:12px"><use href="#i-board"/></svg></span>'
-        +'<span class="ptask__group-name">'+esc(g.board.name)+'</span>'
-        +'<span class="ptask__group-cnt">'+g.nodes.length+'</span>'
-        +'</div>';
-      // 该项目的节点（第二层），按依赖排序
-      var sorted=sortByDependencies(g.nodes,allLinks).slice(0,6);
-      sorted.forEach(function(nd){
-        globalIdx++;
-        var n=nd.n;
-        var pill=TPILL[n.status]||TPILL.planning;
-        var cls='ptask ptask--sub';
-        if(n.status==='today') cls+=' is-now';
-        if(n.status==='done') cls+=' is-done';
-        if(!nd.depDone&&n.status!=='done') cls+=' is-blocked';
-        var depHint='';
-        if(!nd.depDone&&n.status!=='done'){
-          depHint='<div class="ptask__dep">⚠️ 前置未完成：'+nd.depNames.join('、')+'</div>';
-        }
-        html+='<div class="'+cls+'" data-ptask="'+n.id+'" data-board-id="'+g.board.id+'">'
-          +'<span class="ptask__idx">'+String(globalIdx).padStart(2,'0')+'</span>'
-          +'<span class="ptask__check"><svg><use href="#i-check"/></svg></span>'
-          +'<div class="ptask__body">'
-          +'<div class="ptask__name">'+esc(n.title)+'</div>'
-          +'<div class="ptask__meta"><span class="pri pri--'+(n.priority||2)+'">'+(n.priority||'P2')+'</span><span class="pill '+pill.cls+'"><span class="pd"></span>'+pill.txt+'</span></div>'
-          +depHint
-          +'</div></div>';
-      });
-    });
-    list.innerHTML=html;
-    // 绑定点击：勾选完成 / 取消完成
-    $$('[data-ptask]',list).forEach(function(row){
-      row.addEventListener('click',function(){
-        var id=row.dataset.ptask;
-        var n=findNodeAcrossBoards(id);
-        if(!n) return;
-        if(n.status==='done'){
-          n.status='today'; // 取消完成 → 回到进行中
-          toast('已撤回完成 · '+n.title,'#i-refresh');
-          tSave(); refreshAll();
-        }else{
-          // 标记完成 → 弹确认（防止手滑）
-          confirmDone(n.title,function(){
-            n.status='done'; n.doneAt=new Date().toISOString();
-            toast('已完成 · '+n.title,'#i-check2',true);
-            tSave(); refreshAll();
-          });
-        }
-      });
-    });
-    // 项目标题点击 → 跳转白板
-    $$('.ptask__group',list).forEach(function(g){
-      g.addEventListener('click',function(){
-        var boardId=g.dataset.boardId;
-        switchBoard(boardId);
-        setMode('board');
-      });
-    });
-  }
+  /* ---------- 跨项目查找节点：委托到 taskStore ---------- */
+  function findNodeAcrossBoards(id){return window.DOCK.store.findNodeAcrossBoards(id);}
 
-  /* ---------- 全局刷新：数据变化后同步所有模式 UI ---------- */
-  function refreshAll(){
-    var c=tCounts();
-    // 进度
-    var pct=c.total>0?Math.round(c.done/c.total*100):0;
-    var exDone=$('#exDone'), exTotal=$('#exTotal'), exProg=$('#exProgFill');
-    var cmpDone=$('#cmpDone'), cmpBar=$('#cmpBar'), recapDone=$('#recapDone');
-    if(exDone) exDone.textContent=c.done+' 已完成';
-    if(exTotal) exTotal.textContent=c.total+' 项';
-    if(exProg) exProg.style.width=pct+'%';
-    if(cmpDone) cmpDone.innerHTML=c.done+'<small style="font-size:10px;color:var(--muted);font-weight:600">/'+c.total+'</small>';
-    if(cmpBar) cmpBar.style.width=pct+'%';
-    if(recapDone) recapDone.innerHTML=c.done+'<small>/'+c.total+'</small>';
-    // 今日重点计数（跨所有项目，排除 inbox 和已归档）
-    var _allCount=0;
-    tasks.boards.forEach(function(b){_allCount+=b.nodes.filter(function(n){return n.status!=='inbox'&&!n.archived;}).length;});
-    var cnt=$('#exTaskCount'); if(cnt) cnt.textContent=_allCount;
-    // 展开任务列表
-    renderExpandedTasks();
-    renderAgentList();
-    // 正在进行（跨所有项目查找 status='today'）
-    var curTask=null;
-    tasks.boards.forEach(function(b){if(!curTask){curTask=b.nodes.filter(function(n){return n.status==='today';})[0];}});
-    var exCurName=$('#exCurName'), exCurStage=$('#exCurStage');
-    var cmpCurName=$('#cmpCurName'), cmpCurStage=$('#cmpCurStage');
-    if(curTask){
-      if(exCurName) exCurName.textContent=curTask.title;
-      if(exCurStage) exCurStage.textContent=curTask.desc||'进行中';
-      if(cmpCurName) cmpCurName.textContent=curTask.title;
-      if(cmpCurStage) cmpCurStage.textContent=curTask.desc||'进行中';
-    }else{
-      if(exCurName) exCurName.textContent='暂无进行中的任务';
-      if(exCurStage) exCurStage.textContent='去白板选一个任务开始';
-      if(cmpCurName) cmpCurName.textContent='暂无任务 · 去白板添加';
-      if(cmpCurStage) cmpCurStage.textContent='点击进入白板规划';
-    }
-    // 白板底栏计数 + 空状态
-    var bcn=$('#boardCntNodes'); if(bcn) bcn.textContent=tasks.nodes.length+' 张';
-    var bcl=$('#boardCntLinks'); if(bcl) bcl.textContent=tasks.links.length+' 条';
-    var bEmpty=$('#boardEmpty'); if(bEmpty) bEmpty.style.display=tasks.nodes.length?'none':'block';
-  }
+  /* ---------- 展开模式任务列表 / Agent 列表 / chips / pill：委托到 renderTasks.js ---------- */
+  function renderExpandedTasks(){window.DOCK.render.renderExpandedTasks();}
+  function renderAgentList(){window.DOCK.render.renderAgentList();}
+  function renderAIChips(){window.DOCK.render.renderAIChips();}
+  function updateAIPill(){window.DOCK.render.updateAIPill();}
+
+  /* ---------- 全局刷新：委托到 renderTasks.js ---------- */
+  function refreshAll(){window.DOCK.render.refreshAll();}
 
   /* ---------- 展开模式 专注计时 ---------- */
   let exSec=18*60+43, exRun=false;   // 默认暂停：点「开始专注」才累计，避免启动后偷偷计时
@@ -1348,255 +1105,434 @@
     toast('已设为稍后提醒 · 25 分钟后再叫我', '#i-clock');
   }));
 
-  /* ---------- AI 派活（三步法：人主导，AI 辅助） ----------
-     步骤1：人在白板选中便利贴 → 点「派给AI」→ 写清楚要 AI 做什么
-     步骤2：AI 返回拆解草案（步骤列表）→ 人逐条审核：改、删、加
-     步骤3：人确认后 → 便利贴状态变为 ai，记录 aiContext
-     核心：approved=false 时 AI 不执行任何操作
-  */
-  const aiOverlay=$('#aiOverlay'), aiDrawerBody=$('#aiDrawerBody'), aiDrawerAct=$('#aiDrawerAct');
-  let aiDispatchNode=null; // 当前正在派活的便利贴数据
-  let aiDraftPlan=[];      // AI 草案步骤（人可编辑）
-
-  // 打开派活弹窗
-  function openAIDispatch(node){
-    aiDispatchNode=node;
-    aiDraftPlan=[];
-    // 预填：用便利贴标题+描述作为初始指令上下文
-    var initialPrompt=node.title;
-    if(node.desc&&node.desc.trim()&&node.desc!=='双击写点什么') initialPrompt+='：'+node.desc;
-    // 如果已有 aiContext，恢复之前的指令
-    if(node.aiContext&&node.aiContext.prompt) initialPrompt=node.aiContext.prompt;
-    // 步骤1：写指令
-    renderAIStep1(initialPrompt);
-    aiOverlay.classList.add('is-open');
-    document.body.style.overflow='hidden';
-  }
-  function closeAIDispatch(){
-    aiOverlay.classList.remove('is-open');
-    document.body.style.overflow='';
-    aiDispatchNode=null; aiDraftPlan=[];
-  }
-  // 加载态（AI 正在思考）
-  function renderAILoading(){
-    aiDrawerBody.innerHTML='<div style="text-align:center;padding:30px"><span class="spinner" style="width:24px;height:24px;margin-bottom:12px"></span><div style="font-size:12px;color:var(--muted)">AI 正在拆解任务…</div></div>';
-    aiDrawerAct.innerHTML='';
-  }
-  // 步骤1：人写指令
-  function renderAIStep1(prefilled){
-    aiDrawerBody.innerHTML=
-      '<div class="ai-step-label">第一步 · 你想让 AI 做什么？</div>'+
-      '<textarea class="ai-prompt-input" id="aiPromptInput" placeholder="例如：帮我把这个任务拆成今天可以完成的具体步骤，每步不超过 30 分钟">'+esc(prefilled||'')+'</textarea>'+
-      '<div class="ai-warn">⚠️ 先想清楚再派活。AI 不会替你想清楚，它只会更快地把模糊的东西做出来。</div>';
-    aiDrawerAct.innerHTML=
-      '<button class="btn btn--ghost" id="aiCancel1">取消</button>'+
-      '<button class="btn btn--primary" id="aiGenPlan" style="flex:1"><svg><use href="#px-bot"/></svg>让 AI 拆解</button>';
-    $('#aiCancel1').addEventListener('click',closeAIDispatch);
-    $('#aiGenPlan').addEventListener('click',function(){
-      var v=$('#aiPromptInput').value.trim();
-      if(!v){toast('先写清楚要 AI 做什么','#i-spark');return;}
-      // 调用 aiService（mock 或真实 API，由 aiService.js 内部决定）
-      renderAILoading();
-      var taskCtx={title:aiDispatchNode.title,desc:aiDispatchNode.desc};
-      var aiPromise;
-      if(window.dock&&window.dock.ai){
-        aiPromise=window.dock.ai.draftSteps(v,taskCtx);
-      }else{
-        // 浏览器降级：无 IPC，直接用内置 mock
-        aiPromise=Promise.resolve(mockAIDraft(v,aiDispatchNode)).then(function(steps){
-          return {ok:true,steps:steps};
-        });
-      }
-      aiPromise.then(function(r){
-        if(r&&r.ok&&r.steps&&r.steps.length>0){
-          aiDraftPlan=r.steps;
-          renderAIStep2(v);
-        }else{
-          renderAIStep1(v); // 恢复输入界面
-          toast('AI 拆解失败：'+(r&&r.error||'未知错误'),'#i-x');
-        }
-      }).catch(function(err){
-        renderAIStep1(v);
-        toast('AI 请求异常：'+(err.message||err),'#i-x');
-      });
-    });
-    setTimeout(function(){var inp=$('#aiPromptInput');if(inp)inp.focus();},50);
-  }
-  // 步骤2：AI 草案，人审核
-  function renderAIStep2(prompt){
-    aiDrawerBody.innerHTML=
-      '<div class="ai-step-label">第二步 · AI 的拆解草案（请逐条审核）</div>'+
-      '<div style="margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.5">你的指令：'+esc(prompt)+'</div>'+
-      '<div id="aiPlanList"></div>'+
-      '<button class="ai-add-step" id="aiAddStep"><svg style="width:12px;height:12px"><use href="#i-plus"/></svg> 添加步骤</button>'+
-      '<div class="ai-warn">这是 AI 的理解，可能不对。请修改、删除或添加步骤，确认无误后再执行。</div>';
-    aiDrawerAct.innerHTML=
-      '<button class="btn btn--ghost" id="aiBack2">返回修改指令</button>'+
-      '<button class="btn btn--ghost" id="aiCancel2">取消</button>'+
-      '<button class="btn btn--primary" id="aiConfirm" style="flex:1"><svg><use href="#i-check"/></svg>确认执行</button>';
-    renderAIPlanList();
-    $('#aiAddStep').addEventListener('click',function(){aiDraftPlan.push('新步骤');renderAIStep2(prompt);});
-    $('#aiBack2').addEventListener('click',function(){renderAIStep1(prompt);});
-    $('#aiCancel2').addEventListener('click',closeAIDispatch);
-    $('#aiConfirm').addEventListener('click',function(){confirmAIDispatch(prompt);});
-  }
-  function renderAIPlanList(){
-    var list=$('#aiPlanList');if(!list)return;
-    var html='';
-    aiDraftPlan.forEach(function(step,i){
-      html+='<div class="ai-plan-item">'
-        +'<span class="ai-plan-num">'+(i+1)+'</span>'
-        +'<textarea class="ai-plan-edit" rows="1" data-plan-idx="'+i+'">'+esc(step)+'</textarea>'
-        +'<button class="ai-plan-del" data-plan-del="'+i+'" title="删除">✕</button>'
-        +'</div>';
-    });
-    list.innerHTML=html;
-    // 绑定编辑
-    $$('[data-plan-idx]',list).forEach(function(ta){
-      ta.addEventListener('input',function(){aiDraftPlan[parseInt(ta.dataset.planIdx)]=ta.value;});
-      ta.addEventListener('click',function(e){e.stopPropagation();});
-    });
-    // 绑定删除
-    $$('[data-plan-del]',list).forEach(function(btn){
-      btn.addEventListener('click',function(e){e.stopPropagation();aiDraftPlan.splice(parseInt(btn.dataset.planDel),1);renderAIPlanList();});
-    });
-  }
-  // 步骤3：人确认 → 写入 aiContext → 状态变 ai
-  function confirmAIDispatch(prompt){
-    if(!aiDispatchNode)return;
-    // 过滤空步骤
-    var cleanPlan=aiDraftPlan.filter(function(s){return s&&s.trim();});
-    if(cleanPlan.length===0){toast('至少保留一个步骤','#i-x');return;}
-    aiDispatchNode.aiContext={
-      prompt:prompt,
-      plan:cleanPlan,
-      approved:true,
-      approvedAt:new Date().toISOString()
-    };
-    aiDispatchNode.status='ai';
-    // 刷新白板便利贴视觉
-    var el=bNodeEls.get(aiDispatchNode.id);
-    if(el){
-      el.dataset.status='ai';
-      var chip=el.querySelector('.bchip');if(chip){chip.textContent=TLABELS.ai;chip.dataset.st='ai';}
-    }
-    tSave();refreshAll();
-    // 步骤3：展示执行中
-    renderAIStep3(prompt,cleanPlan);
-    toast('已确认 · 任务已派给 AI，共 '+cleanPlan.length+' 步','#px-bot',true);
-    // Agent 列表由 renderAgentList() 自动刷新（refreshAll 触发）
-    refreshAll();
-  }
-  function renderAIStep3(prompt,plan){
-    aiDrawerBody.innerHTML=
-      '<div class="ai-step-label">第三步 · 已派给 AI（执行中）</div>'+
-      '<div style="margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.5">指令：'+esc(prompt)+'</div>'+
-      '<div id="aiExecSteps"></div>';
-    aiDrawerAct.innerHTML='<button class="btn btn--ghost" id="aiClose3" style="flex:1">关闭</button>';
-    var stepsHtml='';
-    plan.forEach(function(s,i){stepsHtml+='<div class="ai-plan-item"><span class="ai-plan-num">'+(i+1)+'</span><span class="ai-plan-edit" style="cursor:default">'+esc(s)+'</span></div>';});
-    $('#aiExecSteps').innerHTML=stepsHtml;
-    $('#aiClose3').addEventListener('click',closeAIDispatch);
-  }
-  // 模拟 AI 拆解（未来替换为真实 AI API）
-  function mockAIDraft(prompt,node){
-    // 基于任务标题和指令生成合理的步骤草案
-    var title=node.title||'任务';
-    var steps=[];
-    if(/拆|拆解|分解|break/.test(prompt)){
-      steps=['分析「'+title+'」的核心目标和约束','识别关键子任务和依赖关系','列出可执行的具体步骤（每步≤30min）','预估每步所需时间','生成任务清单并排优先级'];
-    }else if(/整理|归档|总结|summar/.test(prompt)){
-      steps=['收集「'+title+'」相关材料','提取关键信息要点','按主题/时间分类整理','生成结构化笔记','校对并归档'];
-    }else if(/搜索|调研|查找|research/.test(prompt)){
-      steps=['确定「'+title+'」的搜索关键词','查找权威来源和最新资料','筛选高相关度结果','提取核心发现','整理成调研摘要'];
-    }else{
-      steps=['理解「'+title+'」的具体需求','确定执行方案和约束条件','拆分为可操作的步骤','预估时间和资源','生成执行计划供你确认'];
-    }
-    return steps;
-  }
-  // 关闭弹窗事件
-  $('#aiClose').addEventListener('click',closeAIDispatch);
-  aiOverlay.addEventListener('click',function(e){if(e.target===aiOverlay)closeAIDispatch();});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&aiOverlay.classList.contains('is-open'))closeAIDispatch();});
-
-  // addAgentFromTask 已移除——由 renderAgentList() 统一渲染
-
   const aiInput=$('#aiInput'), aiSend=$('#aiSend');
-  function dispatchAI(){
-    const v=aiInput.value.trim();
-    if(!v){ toast('先输入一个想法或任务再派给 AI', '#i-spark'); aiInput.focus(); return; }
-    // 在当前活跃看板创建一个 status='ai' 的便利贴（真实任务）
-    var newNode=bAddNode(100, 100, {title: v, desc: '来自展开模式输入', status: 'ai', priority: 2});
-    aiInput.value='';
-    toast('已创建 AI 任务 · 切到白板可查看详情', '#px-bot', true);
-  }
-  aiSend.addEventListener('click', dispatchAI);
-  aiInput.addEventListener('keydown', e=>{ if(e.key==='Enter') dispatchAI(); });
-  $$('.chip').forEach(c=>c.addEventListener('click',()=>{
-    aiInput.value=c.dataset.prefill; aiInput.focus();
-  }));
-  // 旧 addAgent 已移除——Agent 列表现在由 renderAgentList() 从真实任务渲染
 
-  /* ---------- Agent 列表：从真实任务（status='ai'）渲染 ---------- */
-  function renderAgentList(){
-    var list=$('#agentList'); if(!list) return;
-    // 跨所有项目聚合 status='ai' 的节点
-    var aiTasks=[];
-    tasks.boards.forEach(function(b){
-      b.nodes.forEach(function(n){if(n.status==='ai'&&!n.archived) aiTasks.push(n);});
+  /* ---------- AI 逐步辅助（人主导，AI 辅助每一步） ----------
+     符合 playbook 哲学：
+     - AI 不自动执行，每步都是人的决策点
+     - 人点「用 AI 辅助这步」→ 调真实 API → 返回结果供人审核
+     - 人确认结果后标记该步完成
+     - 全部步骤完成 → 任务可标记为 done
+  */
+  let aiWorkingStepIdx=-1; // 当前正在用 AI 辅助的步骤索引（-1=无）
+
+  function aiStepProgress(node,stepIdx){
+    if(aiWorkingStepIdx>=0){toast('上一步还在处理，稍等…','#i-clock');return;}
+    var step=node.aiContext.steps[stepIdx];
+    if(!step)return;
+    aiWorkingStepIdx=stepIdx;
+    // 更新 UI：该步显示加载态
+    var stepEl=$('#aiExecStep_'+stepIdx);
+    if(stepEl){
+      stepEl.classList.add('is-loading');
+      var dotEl=stepEl.querySelector('.step__dot');
+      if(dotEl) dotEl.innerHTML='<span class="spinner" style="width:10px;height:10px"></span>';
+    }
+    // 构建上下文：任务标题 + 指令 + 本步内容 + 前序步骤结果 + 白板依赖关系
+    var ctx={
+      title:node.title,
+      desc:node.desc,
+      instruction:node.aiContext.prompt,
+      stepText:step.text,
+      stepIdx:stepIdx,
+      totalSteps:node.aiContext.steps.length,
+      priorSteps:node.aiContext.steps.slice(0,stepIdx).map(function(s){return{s:s.text,r:s.result};}),
+      dependencies:collectBoardDependencies(node.id)
+    };
+    var promise;
+    if(window.dock&&window.dock.ai){
+      promise=window.dock.ai.executeStep(ctx);
+    }else{
+      // 浏览器降级：模拟 AI 输出
+      promise=new Promise(function(resolve){
+        setTimeout(function(){resolve({ok:true,result:'[浏览器降级模拟] 这一步的 AI 输出：\n基于「'+node.title+'」和步骤「'+step.text+'」，AI 会在这里给出具体执行结果或建议。\n\n请审核这个结果，确认无误后标记为完成。'});},800);
+      });
+    }
+    promise.then(function(r){
+      aiWorkingStepIdx=-1;
+      if(r&&r.ok&&r.result){
+        step.result=r.result;
+        step.aiAssisted=true;
+        tSave();
+        // 刷新抽屉展示结果
+        openAgentDrawerById(node.id);
+        toast('AI 已输出第 '+(stepIdx+1)+' 步结果 · 请审核','#px-bot',true);
+      }else{
+        // 恢复步骤状态
+        if(stepEl)stepEl.classList.remove('is-loading');
+        toast('AI 辅助失败：'+(r&&r.error||'未知错误'),'#i-x');
+      }
+    }).catch(function(err){
+      aiWorkingStepIdx=-1;
+      if(stepEl)stepEl.classList.remove('is-loading');
+      toast('AI 请求异常：'+(err.message||err),'#i-x');
     });
-    var cnt=$('#agentCount'); if(cnt) cnt.textContent=aiTasks.length>0?(aiTasks.length+' · 点击查看详情'):'暂无';
-    if(aiTasks.length===0){
-      list.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6">还没有派给 AI 的任务<br>去白板点便利贴右下角的 <svg style="width:12px;height:12px;vertical-align:middle"><use href="#px-bot"/></svg> 派活</div>';
+  }
+
+  // 人标记某步完成（验收）
+  function aiStepComplete(node,stepIdx){
+    var step=node.aiContext.steps[stepIdx];
+    if(!step)return;
+    step.status='done';
+    tSave();
+    // 检查是否全部完成
+    var allDone=node.aiContext.steps.every(function(s){return s.status==='done';});
+    if(allDone){
+      // 不自动标记 done，让人来决定
+      toast('全部 '+node.aiContext.steps.length+' 步已完成 · 可以标记任务完成了','#i-check2',true);
+    }else{
+      var doneCnt=node.aiContext.steps.filter(function(s){return s.status==='done';}).length;
+      toast('第 '+(stepIdx+1)+' 步已验证 · 进度 '+doneCnt+'/'+node.aiContext.steps.length,'#i-check');
+    }
+    openAgentDrawerById(node.id);
+  }
+
+  // 人驳回某步结果（要求重新来）
+  function aiStepReject(node,stepIdx){
+    var step=node.aiContext.steps[stepIdx];
+    if(!step)return;
+    step.result=null;
+    step.aiAssisted=false;
+    tSave();
+    openAgentDrawerById(node.id);
+    toast('已驳回第 '+(stepIdx+1)+' 步结果 · 可重新用 AI 辅助或手动处理','#i-refresh');
+  }
+
+  // 通过 node.id 打开抽屉（供步骤操作后刷新）
+  function openAgentDrawerById(nodeId){
+    var card=document.querySelector('.agent[data-task-id="'+nodeId+'"]');
+    if(card){
+      // 刷新列表后 card 可能已重建，重新查找
+      renderAgentList();
+      card=document.querySelector('.agent[data-task-id="'+nodeId+'"]');
+    }
+    if(card)openDrawer(card);
+  }
+
+  // 人标记整个 AI 任务完成
+  function aiTaskDone(nodeId){
+    var node=findNodeAcrossBoards(nodeId);
+    if(!node)return;
+    var allDone=node.aiContext&&node.aiContext.steps.every(function(s){return s.status==='done';});
+    if(!allDone){
+      toast('还有未完成的步骤，确认全部验证后再标记完成','#i-clock');
       return;
     }
-    var html='';
-    aiTasks.forEach(function(n){
-      var planCount=(n.aiContext&&n.aiContext.plan)?n.aiContext.plan.length:0;
-      var prompt=(n.aiContext&&n.aiContext.prompt)?n.aiContext.prompt:'';
-      html+='<div class="agent" data-agent data-name="'+esc(n.title)+'" data-task-id="'+n.id+'">'
-        +'<div class="agent__top">'
-        +'<span class="pill pill--ai"><span class="pd"></span>执行中</span>'
-        +'<div class="agent__name">'+esc(n.title)+'</div>'
-        +'<span class="agent__chev"><svg><use href="#i-chev"/></svg></span>'
-        +'</div>'
-        +'<div class="agent__step"><span class="spinner"></span>'+planCount+' 步执行计划 · '+(prompt?esc(prompt.slice(0,40)+(prompt.length>40?'…':'')):'AI 执行中')+'</div>'
-        +'<div class="agent__foot"><span>来自白板</span><span class="sep"></span><span>执行中</span></div>'
-        +'</div>';
+    node.status='done';
+    node.completedAt=new Date().toISOString();
+    // 刷新白板便利贴
+    var el=bNodeEls.get(node.id);
+    if(el){
+      el.dataset.status='done';
+      var chip=el.querySelector('.bchip');if(chip){chip.textContent=TLABELS.done;chip.dataset.st='done';}
+    }
+    tSave();refreshAll();
+    closeDrawer();
+    toast('任务已完成 · 已归档','#i-check2',true);
+  }
+  // 收集白板依赖关系：当前任务的上游（前置）和下游（后续）任务
+  function collectBoardDependencies(nodeId){
+    var b=activeBoard(); if(!b) return {upstream:[],downstream:[]};
+    var links=b.links||[];
+    var nodes=b.nodes||[];
+    var nodeMap={}; nodes.forEach(function(n){nodeMap[n.id]=n;});
+    var upstream=[],downstream=[];
+    links.forEach(function(l){
+      var lt=l.linkType||(!l.dashed?'solid':'dashed');
+      var label={solid:'强依赖',dashed:'条件分支',dotted:'参考'}[lt]||'关联';
+      // l.from → l.to：from 是上游，to 是下游
+      if(l.to===nodeId&&nodeMap[l.from]){
+        var up=nodeMap[l.from];
+        upstream.push({title:up.title,desc:up.desc,status:up.status,linkType:label});
+      }
+      if(l.from===nodeId&&nodeMap[l.to]){
+        var dn=nodeMap[l.to];
+        downstream.push({title:dn.title,desc:dn.desc,status:dn.status,linkType:label});
+      }
     });
-    list.innerHTML=html;
+    return {upstream:upstream,downstream:downstream};
+  }
+  // 复制单步提示词到剪贴板，方便人粘贴到任意 AI 工具
+  function copyStepPrompt(node,stepIdx){
+    var step=node.aiContext.steps[stepIdx];
+    if(!step)return;
+    // 构建带完整上下文的提示词
+    var deps=collectBoardDependencies(node.id);
+    var prompt='任务：'+node.title+(node.desc?'（'+node.desc+'）':'')+'\n\n';
+    prompt+='我的指令：'+node.aiContext.prompt+'\n\n';
+    prompt+='当前步骤（第'+(stepIdx+1)+'/'+node.aiContext.steps.length+'步）：'+step.text+'\n\n';
+    // 附上前序步骤结果
+    var prior=node.aiContext.steps.slice(0,stepIdx).filter(function(s){return s.result;});
+    if(prior.length>0){
+      prompt+='前序步骤已完成的结果：\n';
+      prior.forEach(function(s){prompt+='· '+s.text+' → '+s.result.slice(0,200)+'\n';});
+      prompt+='\n';
+    }
+    // 附上依赖关系
+    if(deps.upstream&&deps.upstream.length>0){
+      prompt+='上游任务：'+deps.upstream.map(function(d){return d.title+'('+d.status+')';}).join(', ')+'\n';
+    }
+    if(deps.downstream&&deps.downstream.length>0){
+      prompt+='下游任务：'+deps.downstream.map(function(d){return d.title;}).join(', ')+'\n';
+    }
+    prompt+='\n请帮我执行当前步骤，给出具体结果。';
+    // 复制到剪贴板
+    if(window.dock&&window.dock.ai&&window.dock.ai.copyToClipboard){
+      window.dock.ai.copyToClipboard(prompt).then(function(){
+        toast('提示词已复制 · 粘贴到任意 AI 工具使用','#i-copy',true);
+      });
+    }else{
+      // 浏览器降级
+      navigator.clipboard.writeText(prompt).then(function(){
+        toast('提示词已复制','#i-copy',true);
+      }).catch(function(){
+        toast('复制失败，请手动复制','#i-x');
+      });
+    }
   }
 
-  /* ---------- Agent 详情抽屉（从真实 aiContext 渲染） ---------- */
+  // 打开网页版 AI（带提示词在剪贴板）
+  function openWebAI(node,stepIdx){
+    // 先复制提示词
+    copyStepPrompt(node,stepIdx);
+    // 然后打开网页版 AI
+    var aiUrls={
+      'chatgpt':'https://chat.openai.com/',
+      'deepseek':'https://chat.deepseek.com/',
+      'claude':'https://claude.ai/',
+      'gemini':'https://gemini.google.com/',
+      'kimi':'https://kimi.moonshot.cn/',
+      'doubao':'https://www.doubao.com/chat/'
+    };
+    // 构建选择列表
+    var html='<div class="ai-step-label">选择网页版 AI（提示词已复制）</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">';
+    Object.keys(aiUrls).forEach(function(k){
+      html+='<button class="btn btn--ghost webai-btn" data-url="'+aiUrls[k]+'" style="padding:10px;text-transform:capitalize">'+esc(k)+'</button>';
+    });
+    html+='</div>';
+    html+='<div class="ai-warn" style="margin-top:8px">提示词已复制到剪贴板，打开后在对话框 Ctrl+V 粘贴即可。</div>';
+    // 用 overlay 的 drawer 区域临时展示
+    var drawerAct=$('#drawerAct');
+    if(drawerAct){
+      drawerAct.innerHTML=html;
+      $$('.webai-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var url=btn.dataset.url;
+          if(window.dock&&window.dock.ai&&window.dock.ai.openExternal){
+            window.dock.ai.openExternal(url);
+          }else{
+            window.open(url,'_blank');
+          }
+          toast('已打开 '+btn.textContent.trim()+' · 提示词已复制，粘贴即可','#i-arrow',true);
+          closeDrawer();
+        });
+      });
+    }
+  }
+
+  // 派给本地 Agent（Hermes 风格：后台异步执行，结果回来后审核）
+  function openLocalAgent(node,stepIdx){
+    var step=node.aiContext.steps[stepIdx];
+    if(!step)return;
+    // 构建完整提示词（与 copyStepPrompt 一致）
+    var deps=collectBoardDependencies(node.id);
+    var prompt='任务：'+node.title+(node.desc?'（'+node.desc+'）':'')+'\n\n';
+    prompt+='我的指令：'+node.aiContext.prompt+'\n\n';
+    prompt+='当前步骤（第'+(stepIdx+1)+'/'+node.aiContext.steps.length+'步）：'+step.text+'\n\n';
+    var prior=node.aiContext.steps.slice(0,stepIdx).filter(function(s){return s.result;});
+    if(prior.length>0){
+      prompt+='前序步骤已完成的结果：\n';
+      prior.forEach(function(s){prompt+='· '+s.text+' → '+s.result.slice(0,200)+'\n';});
+      prompt+='\n';
+    }
+    if(deps.upstream&&deps.upstream.length>0){
+      prompt+='上游任务：'+deps.upstream.map(function(d){return d.title+'('+d.status+')';}).join(', ')+'\n';
+    }
+    if(deps.downstream&&deps.downstream.length>0){
+      prompt+='下游任务：'+deps.downstream.map(function(d){return d.title;}).join(', ')+'\n';
+    }
+    prompt+='\n请帮我执行当前步骤，给出具体结果。';
+
+    // 检测本地 Agent
+    if(!window.dock||!window.dock.agent){
+      // 浏览器降级：无法检测本地 Agent
+      var drawerAct=$('#drawerAct');
+      if(drawerAct){
+        drawerAct.innerHTML='<div style="padding:12px;font-size:11px;color:var(--muted);line-height:1.6">浏览器模式下无法检测本地 Agent。<br>请在 Electron 桌面应用中使用此功能。<br><br>已为你复制提示词，可粘贴到 Cursor / Claude Code 等工具。</div>';
+      }
+      copyStepPrompt(node,stepIdx);
+      return;
+    }
+    // 先展示「检测中」
+    var drawerAct=$('#drawerAct');
+    if(drawerAct){
+      drawerAct.innerHTML='<div style="padding:16px;text-align:center"><span class="spinner" style="width:20px;height:20px;margin-bottom:8px"></span><div style="font-size:12px;color:var(--muted)">正在检测本地 Agent…</div></div>';
+    }
+    window.dock.agent.detect().then(function(r){
+      if(!r||!r.ok||!r.agents||r.agents.length===0){
+        // 没检测到本地 Agent
+        if(drawerAct){
+          var html='<div class="ai-step-label">未检测到本地 Agent</div>';
+          html+='<div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px">需要先安装 CLI Agent 工具才能使用此功能：</div>';
+          html+='<div style="font-size:11px;line-height:1.8">';
+          html+='<div><b>Claude Code:</b> <code style="font-size:10px">npm install -g @anthropic/claude-code</code></div>';
+          html+='<div><b>Codex:</b> <code style="font-size:10px">npm install -g @openai/codex</code></div>';
+          html+='<div><b>Gemini CLI:</b> <code style="font-size:10px">npm install -g @anthropic/gemini-cli</code></div>';
+          html+='</div>';
+          html+='<div style="margin-top:10px;font-size:11px;color:var(--muted)">或先复制提示词到其他工具使用。</div>';
+          html+='<div style="margin-top:10px"><button class="btn btn--ghost" id="agentCopyFallback" style="flex:1">复制提示词</button></div>';
+          drawerAct.innerHTML=html;
+          var fb=$('#agentCopyFallback');
+          if(fb)fb.addEventListener('click',function(){copyStepPrompt(node,stepIdx);});
+        }
+        return;
+      }
+      // 展示可用 Agent 列表
+      var html='<div class="ai-step-label">选择本地 Agent 执行</div>';
+      html+='<div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">将派给 Agent 在后台执行，完成后结果会显示在这里。</div>';
+      html+='<div style="display:flex;flex-direction:column;gap:6px">';
+      r.agents.forEach(function(a){
+        html+='<button class="btn btn--ghost agent-pick" data-agent-id="'+a.id+'" style="justify-content:flex-start;padding:10px 12px"><svg style="width:14px;height:14px"><use href="#i-bolt"/></svg>'+esc(a.name)+'</button>';
+      });
+      html+='</div>';
+      if(drawerAct)drawerAct.innerHTML=html;
+      // 绑定选择
+      $$('.agent-pick').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var agentId=btn.dataset.agentId;
+          var agentName=btn.textContent.trim();
+          // 派活
+          if(drawerAct){
+            drawerAct.innerHTML='<div style="padding:16px;text-align:center"><span class="spinner" style="width:20px;height:20px;margin-bottom:8px"></span><div style="font-size:12px;color:var(--muted)">已派给 '+esc(agentName)+' · 后台执行中…</div></div>';
+          }
+          window.dock.agent.dispatch(agentId,prompt,{ nodeId: node.id }).then(function(dr){
+            if(dr&&dr.ok&&dr.taskId){
+              // 记录最近一次 Agent 运行 id 到节点（详情页跳转用）
+              node.lastAgentRunId = dr.taskId;
+              tSave();
+              // 轮询任务状态
+              var pollCount=0;
+              var pollInterval=setInterval(function(){
+                pollCount++;
+                window.dock.agent.status(dr.taskId).then(function(sr){
+                  if(sr&&sr.ok){
+                    if(sr.status==='done'||sr.status==='failed'||sr.status==='error'){
+                      clearInterval(pollInterval);
+                      // 写入步骤结果
+                      step.result='['+agentName+' 输出]\n'+sr.output;
+                      step.aiAssisted=true;
+                      if(sr.status!=='done')step.result='[⚠️ '+agentName+' 退出码 '+sr.exitCode+']\n'+sr.output;
+                      tSave();
+                      openAgentDrawerById(node.id);
+                      toast(agentName+' 已完成 · 请审核结果','#i-bolt',true);
+                    }else if(drawerAct&&sr.output){
+                      // 更新实时输出
+                      var shortOut=sr.output.slice(-200);
+                      drawerAct.innerHTML='<div style="padding:12px;text-align:center"><span class="spinner" style="width:16px;height:16px;margin-bottom:8px"></span><div style="font-size:11px;color:var(--muted);margin-bottom:6px">'+esc(agentName)+' 执行中… ('+pollCount+')</div><pre style="font-size:10px;text-align:left;max-height:120px;overflow:auto;background:var(--card-2);padding:8px;border-radius:6px">'+esc(shortOut)+'</pre></div>';
+                    }
+                  }
+                });
+                // 超时保护（120次轮询 × 2秒 = 4分钟）
+                if(pollCount>120){
+                  clearInterval(pollInterval);
+                  if(drawerAct)drawerAct.innerHTML='<div style="padding:12px;font-size:11px;color:var(--muted)">轮询超时 · Agent 可能仍在后台运行</div>';
+                }
+              },2000);
+              toast('已派给 '+agentName+' · 后台执行中','#i-bolt',true);
+            }else{
+              if(drawerAct)drawerAct.innerHTML='<div style="padding:12px;font-size:11px;color:var(--danger)">派活失败：'+esc(dr&&dr.error||'未知错误')+'</div>';
+            }
+          });
+        });
+      });
+    });
+  }
+
+  // —— AI 派活：委托到 src/renderer/js/ai/dispatchClient.js ——
+  function dispatchAI(){
+    var v=aiInput.value.trim();
+    window.DOCK.dispatch.dispatchAI(v);
+    if(v) aiInput.value='';
+  }
+  function openDispatchPlanner(node){window.DOCK.dispatch.openDispatchPlanner(node);}
+  function closeDispatchPlanner(){window.DOCK.dispatch.closeDispatchPlanner();}
+  function callDispatchPlan(reqBody){return window.DOCK.dispatch.callDispatchPlan(reqBody);}
+  function renderDispatchPlan(plan){window.DOCK.dispatch.renderDispatchPlan(plan);}
+  function createTaskCardsFromPlan(plan){window.DOCK.dispatch.createTaskCardsFromPlan(plan);}
+  aiSend.addEventListener('click',dispatchAI);
+  aiInput.addEventListener('keydown',e=>{if(e.key==='Enter')dispatchAI();});
+
+  /* —— AI 智能分发规划（openDispatchPlanner / callDispatchPlan / renderDispatchPlan /
+     createTaskCardsFromPlan）已委托到 src/renderer/js/ai/dispatchClient.js —— */
+  /* —— renderAIChips / updateAIPill / renderAgentList 已委托到 renderTasks.js —— */
+
+  /* ---------- Agent 详情抽屉（从真实 aiContext 渲染 · 人主导逐步推进） ---------- */
   function detailFor(card){
     var taskId=card.dataset.taskId;
-    // 跨所有项目查找
-    var n=null;
-    tasks.boards.forEach(function(b){
-      if(!n){n=b.nodes.filter(function(x){return x.id===taskId;})[0];}
-    });
+    var n=findNodeAcrossBoards(taskId);
     if(!n){
-      // 兜底：没有关联任务
       var name=card.dataset.name||card.querySelector('.agent__name').textContent;
       return {
-        sub:'Agent · 执行中',
-        steps:[{t:'接收任务 · '+name,time:'刚刚',state:'active'},{t:'输出结果',time:'-',state:'pending'}],
-        running:true,
-        actions:[{label:'继续等待',icon:'#i-clock',primary:true,act:'wait'}]
+        sub:'任务未找到',
+        steps:[{t:'关联的任务已被删除',time:'-',state:'pending',isStatic:true}],
+        running:false,
+        actions:[]
       };
     }
     var ctx=n.aiContext||{};
-    var plan=ctx.plan||[];
-    var steps=plan.map(function(p,i){
-      return {t:p,time:'-',state:i===0?'active':'pending'};
+    var rawSteps=ctx.steps||[];
+    var doneCnt=rawSteps.filter(function(s){return s.status==='done';}).length;
+    var total=rawSteps.length;
+    var allDone=total>0&&doneCnt===total;
+    // 找当前活跃步骤（第一个 pending）
+    var activeIdx=-1;
+    for(var i=0;i<rawSteps.length;i++){if(rawSteps[i].status==='pending'){activeIdx=i;break;}}
+    // 构建步骤展示：每步显示状态 + 可操作
+    var steps=rawSteps.map(function(s,i){
+      var state=s.status==='done'?'done':(i===activeIdx?'active':'pending');
+      return {
+        t:s.text,
+        time:s.status==='done'?'已验证':(i===activeIdx?'当前步骤':'待处理'),
+        state:state,
+        idx:i,
+        hasResult:!!s.result,
+        result:s.result,
+        isStatic:false
+      };
     });
-    if(steps.length===0) steps=[{t:'接收任务 · '+n.title,time:'-',state:'active'},{t:'输出结果',time:'-',state:'pending'}];
+    if(steps.length===0){
+      steps=[{t:'等待计划生成',time:'-',state:'pending',isStatic:true}];
+    }
+    // 操作按钮：提供三种执行通道，人选择如何完成
+    var actions=[];
+    if(!allDone){
+      // 还有未完成步骤
+      if(activeIdx>=0){
+        var activeStep=rawSteps[activeIdx];
+        if(activeStep.result){
+          // 当前步有结果，等待人验收
+          actions.push({label:'驳回 · 重新来',icon:'#i-refresh',act:'reject:'+activeIdx});
+          actions.push({label:'验证通过',icon:'#i-check',primary:true,act:'complete:'+activeIdx});
+        }else{
+          // 当前步无结果：人选择执行通道
+          actions.push({label:'手动完成',icon:'#i-check',act:'complete:'+activeIdx});
+          actions.push({label:'复制提示词',icon:'#i-copy',act:'copy:'+activeIdx});
+          actions.push({label:'网页 AI',icon:'#i-arrow',act:'webai:'+activeIdx});
+          actions.push({label:'派给 Agent',icon:'#i-bolt',act:'localagent:'+activeIdx});
+        }
+      }
+    }else{
+      // 全部完成
+      actions.push({label:'标记任务完成',icon:'#i-check2',primary:true,act:'taskdone'});
+    }
     return {
-      sub:'Agent · 执行中 · '+(plan.length||0)+' 步计划',
+      sub:'人主导推进 · '+doneCnt+'/'+total+' 步已验证'+(allDone?' · 全部完成':''),
       steps:steps,
       out:ctx.prompt?('你的指令：\n'+ctx.prompt):null,
-      running:true,
-      actions:[{label:'继续等待',icon:'#i-clock',primary:true,act:'wait'},{label:'催一下',icon:'#i-bolt',act:'poke'}]
+      running:false,
+      actions:actions,
+      taskId:taskId
     };
   }
   let currentCard=null;
@@ -1605,15 +1541,31 @@
     currentCard=card;
     const d=detailFor(card);
     const name = card.dataset.name || card.querySelector('.agent__name').textContent;
+    // 每步：显示状态点 + 文本 + 时间/结果预览
     const stepsHtml=d.steps.map(s=>{
-      const inner = s.state==='done' ? '<svg><use href="#i-check"/></svg>' : (s.state==='active' ? '<span class="spinner"></span>' : '');
-      return '<div class="step step--'+s.state+'"><span class="step__dot">'+inner+'</span><span class="step__txt">'+esc(s.t)+'</span><span class="step__time">'+esc(s.time)+'</span></div>';
+      var inner='';
+      if(s.isStatic){
+        inner='<svg style="opacity:.4"><use href="#i-clock"/></svg>';
+      }else if(s.state==='done'){
+        inner='<svg><use href="#i-check"/></svg>';
+      }else if(s.state==='active'){
+        inner='<span class="spinner"></span>';
+      }
+      var resultHtml='';
+      if(s.hasResult&&s.result){
+        resultHtml='<div class="step__result"><div class="step__result-label"><svg style="width:10px;height:10px"><use href="#px-bot"/></svg>AI 输出 · 请审核</div><pre>'+esc(s.result)+'</pre></div>';
+      }
+      return '<div class="step step--'+s.state+'"'+(s.idx!==undefined?' id="aiExecStep_'+s.idx+'"':'')+'>'
+        +'<span class="step__dot">'+inner+'</span>'
+        +'<div class="step__body">'
+        +'<span class="step__txt">'+esc(s.t)+'</span>'
+        +'<span class="step__time">'+esc(s.time)+'</span>'
+        +resultHtml
+        +'</div></div>';
     }).join('');
     let midHtml='';
     if(d.out){
-      midHtml='<div><div class="drawer__h"><svg style="width:12px;height:12px"><use href="#i-note"/></svg>'+(d.confirm?'笔记预览':'输出预览')+'</div><div class="drawer__out"><pre>'+esc(d.out)+'</pre></div></div>';
-    }else if(d.running){
-      midHtml='<div><div class="drawer__h"><svg style="width:12px;height:12px"><use href="#i-clock"/></svg>当前状态</div><div class="drawer__out">Agent 正在工作，预计还需约 2 分钟。完成后会在这里展示输出，并在面板提醒你。</div></div>';
+      midHtml='<div><div class="drawer__h"><svg style="width:12px;height:12px"><use href="#i-note"/></svg>你的指令</div><div class="drawer__out"><pre>'+esc(d.out)+'</pre></div></div>';
     }
     const actHtml=d.actions.map(a=>'<button class="btn '+(a.primary?'btn--primary':'btn--ghost')+'" data-act="'+a.act+'"><svg><use href="'+a.icon+'"/></svg>'+a.label+'</button>').join('');
     $('#drawerIcon').innerHTML='<svg><use href="#i-cpu"/></svg>';
@@ -1644,24 +1596,35 @@
   $('#drawerAct').addEventListener('click', e=>{
     const b=e.target.closest('button[data-act]'); if(!b) return;
     const act=b.dataset.act;
-    if(act==='copy'){ toast('结果已复制到剪贴板', '#i-check2', true); }
-    else if(act==='view'){ toast('打开完整结果（演示）', '#i-arrow'); }
-    else if(act==='wait'){ closeDrawer(); toast('好的，继续等待 Agent', '#i-clock'); }
-    else if(act==='poke'){ toast('已提醒 Agent 加速 · 预计提前 1 min', '#i-bolt'); }
-    else if(act==='agree'){ confirmAgent(currentCard); closeDrawer(); }
-    else if(act==='deny'){ closeDrawer(); toast('已取消 · 任务保留待处理', '#i-refresh'); }
+    // 解析动作类型：copy:0 / webai:0 / complete:0 / reject:0 / taskdone
+    if(act.indexOf('copy:')===0){
+      var idx=parseInt(act.split(':')[1]);
+      var node=findNodeAcrossBoards(currentCard.dataset.taskId);
+      if(node&&node.aiContext)copyStepPrompt(node,idx);
+    }else if(act.indexOf('webai:')===0){
+      var idx=parseInt(act.split(':')[1]);
+      var node=findNodeAcrossBoards(currentCard.dataset.taskId);
+      if(node&&node.aiContext)openWebAI(node,idx);
+    }else if(act.indexOf('localagent:')===0){
+      var idx=parseInt(act.split(':')[1]);
+      var node=findNodeAcrossBoards(currentCard.dataset.taskId);
+      if(node&&node.aiContext)openLocalAgent(node,idx);
+    }else if(act.indexOf('complete:')===0){
+      var idx=parseInt(act.split(':')[1]);
+      var node=findNodeAcrossBoards(currentCard.dataset.taskId);
+      if(node&&node.aiContext)aiStepComplete(node,idx);
+    }else if(act.indexOf('reject:')===0){
+      var idx=parseInt(act.split(':')[1]);
+      var node=findNodeAcrossBoards(currentCard.dataset.taskId);
+      if(node&&node.aiContext)aiStepReject(node,idx);
+    }else if(act==='taskdone'){
+      aiTaskDone(currentCard.dataset.taskId);
+    }
   });
   $('#drawerClose').addEventListener('click', closeDrawer);
   overlay.addEventListener('click', e=>{ if(e.target===overlay) closeDrawer(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape' && overlay.classList.contains('is-open')) closeDrawer(); });
   // 卡内快捷链接已由动态渲染替代，无需绑定硬编码的 js-confirm/js-result
-
-  /* ---------- 灵感 → 任务 ---------- */
-  $$('.js-totask').forEach(b=>b.addEventListener('click',()=>{
-    const item=b.closest('.inbox__item'); item.classList.add('is-off');
-    b.textContent='已加入';
-    toast('已转为今日任务 · 加入今日重点', '#i-target', true);
-  }));
 
   /* ---------- 复盘逐条审核（人主导验收） ----------
      AI 只生成草案，每一条都要人确认/修改/拒绝
@@ -1744,6 +1707,56 @@
     var reviewed=doneNodes.filter(function(n){return recapReviews[n.id]&&recapReviews[n.id].verdict!=='pending';}).length;
     return {reviewed:reviewed,total:doneNodes.length};
   }
+  // —— 组装带日期的复盘快照并持久化到 recaps.json（同 date 覆盖，限 90 条）——
+  // rc = recapCountReviewed() 结果；missReasons = ['标题：原因', ...]
+  function archiveRecapSnapshot(rc, missReasons){
+    try{
+      var today=new Date();
+      var dateStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+      // 跨所有看板聚合今日数据
+      var doneNodes=allNodes().filter(function(n){return n.status==='done'&&!n.archived;});
+      var missNodes=allNodes().filter(function(n){return n.status!=='done'&&n.status!=='inbox'&&!n.archived;});
+      var aiCnt=allNodes().filter(function(n){return n.status==='ai';}).length;
+      // 从 DOM 读取 AI 建议（异步生成后已写入 #recapAdvice）
+      var adviceEl=$('#recapAdvice'); var adviceTxt='';
+      if(adviceEl) adviceTxt=adviceEl.textContent.replace(/^.*?·\s*/,'').trim();
+      var snapshot={
+        id:tUid('r'),
+        date:dateStr,
+        createdAt:today.toISOString(),
+        summary:'完成 '+(rc&&rc.total||doneNodes.length)+' 项'+(missNodes.length>0?'，未完成 '+missNodes.length+' 项':''),
+        doneCount:doneNodes.length,
+        totalCount:doneNodes.length+missNodes.length,
+        aiCount:aiCnt,
+        doneTasks:doneNodes.map(function(n){return {title:n.title,desc:n.desc||''};}),
+        missTasks:missNodes.map(function(n){
+          // 匹配用户填写的原因
+          var reason='';
+          for(var i=0;i<missReasons.length;i++){ if(missReasons[i].indexOf(n.title)===0){ reason=missReasons[i].slice(n.title.length).replace(/^[:：]\s*/,''); break; } }
+          return {title:n.title,desc:n.desc||'',status:n.status||'',reason:reason};
+        }),
+        advice:adviceTxt
+      };
+      // 持久化：经 IPC 读取现有 recaps → 合并（同 date 覆盖，限 90 条）→ 写回
+      if(window.dock&&window.dock.data){
+        window.dock.data.load('recaps').then(function(r){
+          var existing=[];
+          if(r&&r.ok&&r.data){
+            // 兼容 {items:[...]} / 数组 / {}
+            if(Array.isArray(r.data)) existing=r.data;
+            else if(Array.isArray(r.data.items)) existing=r.data.items;
+          }
+          // 同 date 覆盖
+          var replaced=false;
+          for(var i=0;i<existing.length;i++){ if(existing[i].date===dateStr){ existing[i]=snapshot; replaced=true; break; } }
+          if(!replaced) existing.unshift(snapshot);
+          // 限 90 条
+          if(existing.length>90) existing=existing.slice(0,90);
+          return window.dock.data.save('recaps',{items:existing});
+        }).then(function(){ /* 已保存 */ }).catch(function(e){ console.error('[recap archive] 保存失败',e); });
+      }
+    }catch(e){ console.error('[recap archive] 异常',e); }
+  }
   function recapBindEvents(){
     var wrap=$('#recapReport');
     if(!wrap) return;
@@ -1802,6 +1815,8 @@
           if(n) missReasons.push(n.title+'：'+inp.value.trim());
         }
       });
+      // —— 真正归档：组装带日期的复盘快照，写入 recaps.json ——
+      archiveRecapSnapshot(rc, missReasons);
       toast('已归档到历史复盘 · 完成 '+rc.total+' 项'+(missReasons.length>0?'，记录 '+missReasons.length+' 条反思':''),'#i-check2',true);
       $('#recapReportWrap').hidden=true;
     });
@@ -1873,6 +1888,56 @@
 
   /* ---------- 底部操作栏 ---------- */
   $('#dockAdd').addEventListener('click',()=>{ setMode('board'); toast('已进入白板 · 双击画布添加便利贴', '#i-board', true); });
+
+  /* ---------- 快速添加今日任务（回车 / 点 + 按钮 → 直接创建「今日」任务卡）---------- */
+  function quickAddTodayTask(text){
+    text=(text||'').trim();
+    if(!text){ toast('先输入任务内容','#i-plus'); return; }
+    // 确保有活跃看板（没有则创建）
+    var board=activeBoard();
+    if(!board){ createBoard('今日工作流'); board=activeBoard(); }
+    // 直接往当前看板加一张「今日」任务卡（不走白板，自动堆叠位置）
+    var pos=quickAddPosition(board);
+    var node={
+      id:tUid('t'),
+      x:pos.x, y:pos.y,
+      status:'today',
+      num:String(board.nodes.length+1).padStart(2,'0'),
+      title:text,
+      desc:'',
+      priority:2,
+      createdAt:new Date().toISOString(),
+      source:'quickadd'
+    };
+    board.nodes.push(node);
+    tPushHistory();
+    tSave();
+    refreshAll();
+    toast('已加入今日 · '+text,'#i-check2',true);
+  }
+  // 快速添加任务的自动堆叠位置（避免与白板上已有卡片重叠）
+  function quickAddPosition(board){
+    var existing=(board&&board.nodes)||[];
+    // 找一个相对空闲的网格位置（10 列 × 行，每格 220×150）
+    var occupied={};
+    existing.forEach(function(n){ occupied[Math.round(n.x/220)+'_'+Math.round(n.y/150)]=true; });
+    for(var row=0; row<20; row++){
+      for(var col=0; col<10; col++){
+        var key=col+'_'+row;
+        if(!occupied[key]) return { x:30+col*220, y:30+row*150 };
+      }
+    }
+    return { x:30+Math.random()*200, y:30+Math.random()*150 };
+  }
+  // 绑定输入框：回车添加，按钮点击添加
+  (function bindQuickAdd(){
+    var inp=$('#quickAddInput'), btn=$('#quickAddBtn');
+    if(!inp) return;
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){ e.preventDefault(); quickAddTodayTask(inp.value); inp.value=''; inp.focus(); }
+    });
+    if(btn) btn.addEventListener('click',function(){ quickAddTodayTask(inp.value); inp.value=''; inp.focus(); });
+  })();
   $('#dockFocus').addEventListener('click',()=>{
     if(!exRun){ exRun=true; curToggleTxt.textContent='暂停专注'; curToggle.querySelector('use').setAttribute('href','#i-pause'); }
     setMode('focus');
@@ -1906,18 +1971,21 @@
   }));
 
   /* ---------- 专注模式倒计时 ---------- */
+  // FOC_MINUTES 由启动设置覆盖（settings.html 的「默认专注时长」，默认 25）
+  let FOC_MINUTES=25;
   const foc=$('#foc'), focTime=$('#focTime'), focUnit=$('#focUnit'), focProg=$('#focProg');
-  let focSec=25*60, focRun=false, focDone=false;   // 默认暂停：只在专注模式下才倒计时
+  let focSec=FOC_MINUTES*60, focRun=false, focDone=false;   // 默认暂停：只在专注模式下才倒计时
   const CIRC=2*Math.PI*88;
   function renderFoc(){
     focTime.textContent=pad(Math.floor(focSec/60))+':'+pad(focSec%60);
-    const el=(25*60-focSec)/(25*60);
+    const total=FOC_MINUTES*60;
+    const el=(total-focSec)/total;
     focProg.style.strokeDashoffset = CIRC*(1-el);
   }
   // 进入专注 → 开始（若上一轮已完成则先重置）；离开专注 → 暂停（保留剩余时间）
   function startFoc(){ if(focDone) resetFoc(); focRun=true; if(focUnit) focUnit.textContent='剩余时间'; }
   function pauseFoc(){ focRun=false; }
-  function resetFoc(){ focSec=25*60; focDone=false; focRun=false; if(foc){foc.classList.remove('is-done');} if(focUnit){focUnit.textContent='剩余时间';} renderFoc(); }
+  function resetFoc(){ focSec=FOC_MINUTES*60; focDone=false; focRun=false; if(foc){foc.classList.remove('is-done');} if(focUnit){focUnit.textContent='剩余时间';} renderFoc(); }
   renderFoc();
   setInterval(()=>{ if(focRun && focSec>0){ focSec--; renderFoc(); if(focSec===0){ focRun=false; focDone=true; foc.classList.add('is-done'); focUnit.textContent='专注完成'; toast('专注完成 · 已记录 1 次番茄钟', '#i-check2', true); } } },1000);
   $('#focDone').addEventListener('click',()=>{
@@ -1991,9 +2059,9 @@
       }
     });
     var port=el.querySelector('.bport');port.addEventListener('pointerdown',function(e){e.stopPropagation();});port.addEventListener('click',function(e){e.stopPropagation();if(bLinkingFrom===n.id)bCancelLinking();else bStartLinking(n.id);});
-    // 派给 AI 按钮：打开三步法弹窗
+    // 派给 AI 按钮：打开 AI 分发台（与展开面板统一入口）
     var aiBtn=el.querySelector('.bai-btn');
-    if(aiBtn) aiBtn.addEventListener('click',function(e){e.stopPropagation();openAIDispatch(n);});
+    if(aiBtn) aiBtn.addEventListener('click',function(e){e.stopPropagation();openDispatchPlanner(n);});
     function bindEdit(sel,key){var c=el.querySelector(sel);c.addEventListener('input',function(){n[key]=c.textContent;tSave();refreshAll();});c.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();}if(ev.key==='Escape'){c.blur();}});}
     bindEdit('.btitle','title');bindEdit('.bdesc','desc');
   }
@@ -2018,14 +2086,19 @@
 
   function bFullRender(){bNodesWrap.innerHTML='';bNodeEls.clear();tasks.nodes.forEach(function(n){bCreateNodeEl(n);});bDrawLinks();refreshAll();}
   function bUndo(){var ae=document.activeElement;if(ae&&(ae.isContentEditable||ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'))return;if(!bHistory.length){toast('没有能撤回的了','#i-x');return;}tasks=bHistory.pop();bFullRender();tSave();toast('撤回了一步','#i-refresh');}
-  function bClearAll(){if(!tasks.nodes.length&&!tasks.links.length){toast('本来就是空的','#i-x');return;}tPushHistory();tasks.nodes=[];tasks.links=[];bSelectedLink=null;if(bLinkingFrom)bCancelLinking();bFullRender();tSave();toast('擦干净了','#i-x');}
+  function bClearAll(){if(!tasks.nodes.length&&!tasks.links.length){toast('本来就是空的','#i-x');return;}tPushHistory();var b=activeBoard();if(b){b.nodes=[];b.links=[];}tasks.nodes=[];tasks.links=[];bSelectedLink=null;if(bLinkingFrom)bCancelLinking();bFullRender();tSave();toast('擦干净了','#i-x');}
   function bNewAtView(){var x=bCanvas.scrollLeft+bCanvas.clientWidth/2-BNW/2;var y=bCanvas.scrollTop+bCanvas.clientHeight/2-40;var n=bAddNode(x,y);setTimeout(function(){var el=bNodeEls.get(n.id);if(!el)return;var t=el.querySelector('.btitle');t.focus();},10);}
   function bLoadExample(){
-    tPushHistory();tasks={nodes:[],links:[]};bStatusIdx=0;
+    tPushHistory();
+    // 重置当前活跃看板的 nodes/links（不要覆盖整个 tasks，会丢掉 boards）
+    var b=activeBoard(); if(!b)return;
+    b.nodes=[]; b.links=[];
+    syncActiveRefs();
+    bStatusIdx=0;
     // 2行3列布局，间距充足（每张172宽，间距100）
     var a=bMakeNode(30,30,{status:'inbox',num:'01',title:'记下想法',desc:'随手丢进 Inbox',priority:2});
     var b=bMakeNode(300,30,{status:'planning',num:'02',title:'整理成任务',desc:'拆步骤 · 标优先级',priority:1});
-    var c=bMakeNode(570,30,{status:'ai',num:'03',title:'派给 AI',desc:'一句话下派',priority:1});
+    var c=bMakeNode(570,30,{status:'planning',num:'03',title:'派给 AI',desc:'一句话下派',priority:1});
     var d=bMakeNode(300,220,{status:'manual',num:'04',title:'人工处理',desc:'AI 搞不定的你来',priority:2});
     var e=bMakeNode(570,220,{status:'today',num:'05',title:'今日执行',desc:'今天必须做完',priority:1});
     var f=bMakeNode(840,220,{status:'done',num:'06',title:'完成复盘',desc:'归档 + 沉淀经验',priority:2});
@@ -2040,65 +2113,112 @@
     bFullRender();tSave();toast('载入了示例工作流','#i-board',true);
   }
   $$('[data-board-act]').forEach(function(btn){btn.addEventListener('click',function(){var act=btn.dataset.boardAct;if(act==='new')bNewAtView();else if(act==='example')bLoadExample();else if(act==='undo')bUndo();else if(act==='clear')bClearAll();else if(act==='back')setMode('expanded');});});
-  // 统一数据初始化：读取 localStorage（v3 多项目 / 旧格式自动迁移），没有则创建示例
-  (function tInit(){
-    var raw=null;
-    try{raw=localStorage.getItem(TSTORAGE);}catch(e){}
-    if(raw){
-      var parsed=null;
-      try{parsed=JSON.parse(raw);}catch(e){parsed=null;}
-      // 校验多项目结构
-      if(parsed&&parsed.boards&&Array.isArray(parsed.boards)&&parsed.boards.length>0){
-        tasks={boards:parsed.boards,activeBoardId:parsed.activeBoardId||parsed.boards[0].id,nodes:[],links:[]};
-        syncActiveRefs();
-        bFullRender();
-        renderBoardSidebar();
-      }else{
-        // v3 无效或旧格式 → 尝试 v2 迁移
-        migrateV2();
-      }
-    }else{
-      // 首次使用 → 创建默认看板 + 示例
-      migrateV2();
-    }
-    // 启动时执行一次自动归档
-    autoArchive();
-    // 每 30 分钟检查一次自动归档
-    setInterval(autoArchive, 30*60*1000);
-  })();
 
-  // v2/v3旧格式 → v3多项目 迁移：把扁平的 nodes/links 包进一个项目
-  function migrateV2(){
-    // 先检查 v3 key 中是否有旧格式（nodes/links 但无 boards）
-    var oldData=null;
-    try{oldData=JSON.parse(localStorage.getItem(TSTORAGE));}catch(e){}
-    if(oldData&&oldData.nodes&&Array.isArray(oldData.nodes)&&oldData.nodes.length>0&&(!oldData.boards||oldData.boards.length===0)){
-      // v3 key 中存的是旧格式 → 迁移
-      tasks={boards:[{id:tUid('b'),name:'今日工作流',nodes:oldData.nodes,links:oldData.links||[]}],activeBoardId:null};
-      tasks.activeBoardId=tasks.boards[0].id;
-      syncActiveRefs();
+  // —— 桥接：把白板编排函数统一暴露到 window.DOCK.app ——
+  // app 是「应用编排」网关（含 DOM 渲染、setMode、白板 CRUD），
+  // 外部模块（renderTasks.js / dispatchClient.js）一律从这里取，不反向注入 store。
+  // store 仅保留纯数据职责（CRUD/持久化/排序），getTasks 由 store 自身提供
+  // （返回与 dock.html 内 tasks 同一对象引用）。
+  window.DOCK.app = {
+    setMode: setMode,
+    switchBoard: switchBoard,
+    refreshAll: refreshAll,
+    bFullRender: bFullRender,
+    bAddNode: bAddNode,
+    bMakeNode: bMakeNode,
+    createBoard: createBoard
+  };
+
+  // —— 应用持久化设置（启动时从 settings.json 读取并生效）——
+  // 形状：{ alwaysOnTop:bool, opacity:0.55~1, launchAtLogin:bool, focusMinutes:25|45|60 }
+  function applyStoredSettings(){
+    if(!window.dock||!window.dock.data) return;
+    window.dock.data.load('settings').then(function(r){
+      if(!r||!r.ok||!r.data) return;
+      var s=r.data;
+      // 常驻置顶
+      if(typeof s.alwaysOnTop==='boolean'){
+        if(window.dock.setAlwaysOnTop) window.dock.setAlwaysOnTop(s.alwaysOnTop);
+        ['#btnPin','#cmpPin'].forEach(function(sel){var b=$(sel); if(b) b.classList.toggle('is-active',s.alwaysOnTop);});
+      }
+      // 整窗透明度
+      if(typeof s.opacity==='number'){
+        var op=Math.max(0.2,Math.min(1,s.opacity));
+        if(window.dock.setOpacity) window.dock.setOpacity(op);
+        // 同步透明度按钮档位（100/85/70 → 找最接近的）
+        var OPS2=['100','85','70']; var best=0,bestDiff=99;
+        OPS2.forEach(function(v,i){var d=Math.abs(Number(v)/100-op); if(d<bestDiff){bestDiff=d;best=i;}});
+        opStep=best;
+      }
+      // 默认专注时长（分钟）
+      if(typeof s.focusMinutes==='number' && [25,45,60].indexOf(s.focusMinutes)>=0){
+        FOC_MINUTES=s.focusMinutes;
+        resetFoc();
+      }
+    }).catch(function(){ /* 浏览器降级或无设置文件，忽略 */ });
+  }
+
+  // 统一数据初始化：从主进程 tasks.json 加载（Electron）或 localStorage（浏览器降级）
+  // 已改为异步：先 await store.init()，再做渲染
+  async function tInit(){
+    var result = await window.DOCK.store.init();
+    var source = result.source; // 'file' | 'localStorage' | 'empty'
+
+    if(source==='file' || source==='localStorage'){
+      // 数据已加载到 tasks 引用 → 直接渲染
       bFullRender();
       renderBoardSidebar();
-      tSave();
-      return;
-    }
-    // 再检查 v2 key
-    try{oldData=JSON.parse(localStorage.getItem('dailyDockTasks:v2'));}catch(e){}
-    if(oldData&&oldData.nodes&&oldData.nodes.length>0){
-      tasks={boards:[{id:tUid('b'),name:'今日工作流',nodes:oldData.nodes,links:oldData.links||[]}],activeBoardId:null};
-      tasks.activeBoardId=tasks.boards[0].id;
-      syncActiveRefs();
-      bFullRender();
-      renderBoardSidebar();
-      tSave();
-    }else{
-      // 全新用户 → 示例项目
-      tasks={boards:[],activeBoardId:null};
+    } else {
+      // 空数据 → 创建默认看板 + 示例
       createBoard('今日工作流');
       bLoadExample();
       renderBoardSidebar();
     }
+    // 数据升级：旧 aiContext.plan → 新 aiContext.steps（每步含状态）
+    upgradeAiContext();
+    // 启动时执行一次自动归档
+    autoArchive();
+    // 每 30 分钟检查一次自动归档
+    setInterval(autoArchive, 30*60*1000);
+    // —— 应用持久化设置（alwaysOnTop / opacity / focusMinutes）——
+    applyStoredSettings();
+    // 监听外部修改（CLI add/complete 或其他窗口改了数据 → 重新加载并刷新 UI）
+    window.DOCK.store.onExternalChange(function(payload){
+      bFullRender();
+      renderBoardSidebar();
+      refreshAll();
+      if(payload && payload.action==='add'){
+        toast('CLI · 新增任务：'+(payload.node?payload.node.title:''),'#i-plus',true);
+      } else if(payload && payload.action==='complete'){
+        toast('CLI · 已完成 '+((payload.nodes&&payload.nodes.length)||0)+' 个任务','#i-check2',true);
+      }
+    });
   }
+  // 启动初始化（异步）
+  tInit();
+
+  // 旧数据升级：aiContext.plan（字符串数组）→ aiContext.steps（对象数组）
+  function upgradeAiContext(){
+    if(!tasks.boards)return;
+    var changed=false;
+    tasks.boards.forEach(function(b){
+      if(!b.nodes)return;
+      b.nodes.forEach(function(n){
+        if(n.aiContext&&n.aiContext.plan&&!n.aiContext.steps){
+          // 旧格式 → 转新格式
+          n.aiContext.steps=n.aiContext.plan.map(function(s){
+            return{text:s,status:'pending',result:null,aiAssisted:false};
+          });
+          delete n.aiContext.plan;
+          changed=true;
+        }
+      });
+    });
+    if(changed)tSave();
+  }
+
+  /* 注：旧版 migrateV2() 已移除，迁移逻辑统一由 taskStore.js 的
+     init() / normalizeLegacyData() 处理（支持 localStorage → tasks.json 迁移） */
 
   /* ---------- 单面板四态切换（compact / board / expanded / focus） ---------- */
   const MODES=['compact','board','expanded','focus'];
@@ -2216,36 +2336,13 @@
     });
   }
 
-  /* ---------- Electron：CLI 命令（dock add/list/complete/recap）---------- */
+  /* ---------- Electron：CLI 命令（dock recap 等渲染层操作）---------- */
+  /* 注：CLI 的 add / complete 已由主进程 dataService 直接处理，
+     通过 tasks:changed 事件（tInit 中监听）自动刷新 UI。
+     这里只处理需要渲染层参与的命令（如 recap）。 */
   if(window.dock && window.dock.onCliCommand){
     window.dock.onCliCommand(function(payload){
-      if(payload.cmd==='add'){
-        // 创建新便利贴在当前活跃看板
-        bAddNode(100, 100, {title: payload.title, desc: '来自 CLI', status: 'inbox'});
-        // 如果不在白板模式，切过去
-        var cur=$('#app').dataset.mode;
-        if(cur!=='board'){ setMode('board'); }
-        toast('CLI · 已创建：'+payload.title, '#i-plus', true);
-      }
-      else if(payload.cmd==='complete'){
-        // 模糊匹配标题，标记完成
-        var match=payload.match||'';
-        // 跨所有项目模糊匹配
-        var found=[];
-        tasks.boards.forEach(function(b){
-          b.nodes.forEach(function(n){
-            if(n.title.indexOf(match)>=0||n.title.toLowerCase().indexOf(match.toLowerCase())>=0) found.push(n);
-          });
-        });
-        if(found.length>0){
-          found.forEach(function(n){n.status='done';n.doneAt=new Date().toISOString();});
-          tSave(); refreshAll();
-          toast('CLI · 已标记完成 '+found.length+' 个任务', '#i-check2', true);
-        }else{
-          toast('CLI · 未找到匹配「'+match+'」的任务', '#i-x');
-        }
-      }
-      else if(payload.cmd==='recap'){
+      if(payload.cmd==='recap'){
         var cur2=$('#app').dataset.mode;
         if(cur2!=='expanded') setMode('expanded');
         setTimeout(function(){var btn=$('#recapGen'); if(btn) btn.click();},300);

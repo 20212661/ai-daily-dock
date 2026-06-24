@@ -8,13 +8,17 @@
    - 系统托盘：左键显隐 / 右键菜单（显示·置顶·退出）
    - 安全加固：拦截外部导航 / 新窗口、注入 CSP
    ============================================================ */
-const { app, BrowserWindow, Tray, Menu, ipcMain, shell, session, nativeImage, safeStorage, globalShortcut } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, shell, clipboard, session, nativeImage, safeStorage, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const net = require('net');
 
 // —— AI 能力隔离层 ——
 const aiService = require('./aiService');
+// —— Hermes 风格本地 Agent 桥接 ——
+const agentBridge = require('./agentBridge');
+// —— 主进程统一数据层（tasks.json 等 JSON 文件管理）——
+const dataService = require('./dataService');
 
 // —— 资源路径 ——
 const ROOT = __dirname;
@@ -289,6 +293,80 @@ ipcMain.handle('ai:draftSteps', async (_e, prompt, taskContext) => {
   }
 });
 
+// AI 多模型头脑风暴（三个视角并发分析，人综合决策）
+ipcMain.handle('ai:brainstorm', async (_e, prompt, taskContext) => {
+  try {
+    const analyses = await aiService.brainstorm(prompt, taskContext);
+    return { ok: true, analyses };
+  } catch (err) {
+    return { ok: false, error: err.message, analyses: [] };
+  }
+});
+
+// 剪贴板写入
+ipcMain.handle('clipboard:write', (_e, text) => {
+  clipboard.writeText(text);
+  return { ok: true };
+});
+
+// 打开外部链接
+ipcMain.handle('shell:openExternal', (_e, url) => {
+  shell.openExternal(url);
+  return { ok: true };
+});
+
+// AI 逐步执行（人主导：人点某一步 → AI 返回该步结果 → 人审核验收）
+ipcMain.handle('ai:executeStep', async (_e, stepContext) => {
+  try {
+    const result = await aiService.executeStep(stepContext);
+    return { ok: true, result };
+  } catch (err) {
+    return { ok: false, error: err.message, result: '' };
+  }
+});
+
+/* ---------- Hermes 本地 Agent 桥接 ---------- */
+// 检测本地已安装的 CLI Agent
+ipcMain.handle('agent:detect', () => {
+  return { ok: true, agents: agentBridge.detectAgents() };
+});
+
+// 派活给本地 Agent（后台异步执行）
+ipcMain.handle('agent:dispatch', (_e, agentId, prompt, opts) => {
+  return agentBridge.dispatchToAgent(agentId, prompt, opts || {});
+});
+
+// 查询 Agent 任务状态（轮询）
+ipcMain.handle('agent:status', (_e, taskId) => {
+  return agentBridge.getAgentTaskStatus(taskId);
+});
+
+// 取消 Agent 任务
+ipcMain.handle('agent:cancel', (_e, taskId) => {
+  return agentBridge.cancelAgentTask(taskId);
+});
+
+// 列出所有 Agent 任务
+ipcMain.handle('agent:list', () => {
+  return { ok: true, tasks: agentBridge.listAgentTasks() };
+});
+
+// Agent 运行历史（持久化的 agent-runs.json，按时间倒序）
+ipcMain.handle('agent:runs', () => {
+  return { ok: true, runs: dataService.getAgentRuns() };
+});
+
+// 按 taskId 查单条 Agent 历史记录
+ipcMain.handle('agent:run', (_e, taskId) => {
+  var run = dataService.findAgentRun(taskId);
+  return run ? { ok: true, run: run } : { ok: false, error: '历史记录不存在' };
+});
+
+// 复盘快照列表（持久化的 recaps.json，按 date 倒序）
+ipcMain.handle('recaps:list', () => {
+  return { ok: true, items: dataService.getRecaps() };
+});
+
 // AI 复盘建议
 ipcMain.handle('ai:recapAdvice', async (_e, doneTasks, missTasks) => {
   try {
@@ -297,6 +375,74 @@ ipcMain.handle('ai:recapAdvice', async (_e, doneTasks, missTasks) => {
   } catch (err) {
     return { ok: false, error: err.message, advice: '' };
   }
+});
+
+/* ============================================================
+   数据层 IPC：渲染层通过这些通道读写 tasks.json
+   主进程是唯一数据真值来源，渲染层持有内存缓存
+   ============================================================ */
+
+// 读取全部任务数据（启动时加载到渲染层缓存）
+ipcMain.handle('tasks:load', () => {
+  try {
+    const tasks = dataService.getTasks();
+    return { ok: true, tasks: tasks };
+  } catch (err) {
+    return { ok: false, error: err.message, tasks: null };
+  }
+});
+
+// 保存任务数据（渲染层全量推送，主进程防抖写入 JSON）
+ipcMain.handle('tasks:save', (_e, tasksData) => {
+  try {
+    dataService.setTasks(tasksData);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+// 立即保存（非防抖，用于退出 / 关键操作）
+ipcMain.handle('tasks:saveNow', (_e, tasksData) => {
+  try {
+    return { ok: dataService.saveTasksNow(tasksData) };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+// 便捷查询：获取所有节点（跨所有看板）
+ipcMain.handle('tasks:allNodes', () => {
+  return { ok: true, nodes: dataService.getAllNodes() };
+});
+
+// 便捷查询：统计
+ipcMain.handle('tasks:counts', () => {
+  return { ok: true, counts: dataService.getCounts() };
+});
+
+// 便捷查询：按 id 查节点
+ipcMain.handle('tasks:findNode', (_e, id) => {
+  return { ok: true, node: dataService.findNode(id) };
+});
+
+// 通用数据文件读写（settings / recaps / agentRuns / modelConfig）
+ipcMain.handle('data:load', (_e, name) => {
+  return { ok: true, data: dataService.load(name) };
+});
+ipcMain.handle('data:save', (_e, name, data) => {
+  return { ok: dataService.save(name, data) };
+});
+
+// 数据导出 / 导入 / 清除
+ipcMain.handle('data:export', () => {
+  return { ok: true, data: dataService.exportAll() };
+});
+ipcMain.handle('data:import', (_e, data) => {
+  return { ok: dataService.importAll(data) };
+});
+ipcMain.handle('data:clear', () => {
+  return { ok: dataService.clearAll() };
 });
 
 // 获取 AI 配置信息（不暴露 Key）
@@ -332,12 +478,51 @@ ipcMain.handle('dock:close', (e) => {
   return true;
 });
 
+// —— 开机自启（写入系统登录项，settings 页控制）——
+ipcMain.handle('app:getLoginItem', () => {
+  try {
+    var s = app.getLoginItemSettings();
+    return { ok: true, openAtLogin: !!s.openAtLogin };
+  } catch (e) {
+    return { ok: false, error: e.message, openAtLogin: false };
+  }
+});
+ipcMain.handle('app:setLoginItem', (_e, on) => {
+  try {
+    app.setLoginItemSettings({ openAtLogin: !!on });
+    return { ok: true, openAtLogin: !!on };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
 // —— CLI IPC Server：接收 dock CLI 命令 ——
 let ipcServer = null;
+
+// 每次启动生成一次性 token，CLI 必须在每条命令里带上，避免同机其他进程
+// 任意 add/complete/recap。token 写入用户临时目录的文件，CLI（同用户）可读。
+// 路径按用户隔离：多用户机器上互不干扰。
+function genToken() {
+  // crypto.randomUUID 在 Node ≥14.17 可用，否则降级
+  try { return require('crypto').randomUUID(); } catch (_) {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+}
+const IPC_TOKEN = genToken();
+function tokenFilePath() {
+  const os = require('os');
+  const uid = (os.userInfo && os.userInfo().uid) || process.env.USERNAME || 'user';
+  return path.join(os.tmpdir(), 'daily-dock-ipc-token-' + uid);
+}
+
 function startIpcServer() {
+  // 管道路径按用户隔离（多用户机器不冲突）
   const PIPE_PATH = process.platform === 'win32'
-    ? '\\\\.\\pipe\\daily-dock-ipc'
-    : '/tmp/daily-dock-ipc.sock';
+    ? '\\\\.\\pipe\\daily-dock-ipc-' + (process.env.USERNAME || 'user')
+    : '/tmp/daily-dock-ipc-' + ((require('os').userInfo && require('os').userInfo().uid) || 'user') + '.sock';
+
+  // 把 token 写到文件，CLI 启动时读取并附在每条命令里
+  try { fs.writeFileSync(tokenFilePath(), IPC_TOKEN, { mode: 0o600 }); } catch (_) {}
 
   // 清理旧 socket
   try { if (process.platform !== 'win32') fs.unlinkSync(PIPE_PATH); } catch (_) {}
@@ -349,7 +534,12 @@ function startIpcServer() {
       let res = { ok: false, error: '无效命令' };
       try {
         const msg = JSON.parse(data);
-        res = handleCliCommand(msg);
+        // 鉴权：token 不匹配直接拒绝（防同机其他进程未授权调用）
+        if (!msg || msg.token !== IPC_TOKEN) {
+          res = { ok: false, error: '未授权：token 不匹配（请用 dock CLI 调用）' };
+        } else {
+          res = handleCliCommand(msg);
+        }
       } catch (e) {
         res = { ok: false, error: e.message };
       }
@@ -375,27 +565,40 @@ function handleCliCommand(msg) {
       return { ok: true, message: 'Dock 已显示' };
 
     case 'add':
-    case 'new':
-      if (!mainWindow) return { ok: false, error: '窗口未初始化' };
-      showWindow();
-      // 发送给渲染层创建便利贴
-      mainWindow.webContents.send('cli:command', { cmd: 'add', title: msg.title });
-      return { ok: true, message: '已创建便利贴：' + msg.title };
+    case 'new': {
+      // 主进程直接写入 tasks.json，并通知渲染层刷新
+      const node = dataService.cliAddTask(msg.title || '未命名');
+      if (mainWindow) {
+        showWindow();
+        // 通知渲染层从主进程重新加载数据
+        mainWindow.webContents.send('tasks:changed', { source: 'cli', action: 'add', node: node });
+      }
+      return { ok: true, message: '已创建任务：' + (msg.title || '未命名'), data: { id: node.id, title: node.title } };
+    }
 
     case 'list':
-    case 'ls':
-      if (!mainWindow) return { ok: false, error: '窗口未初始化' };
-      // 同步获取数据（渲染层已存 localStorage，主进程读不到）
-      // 这里返回提示，让 CLI 从渲染层获取
-      mainWindow.webContents.send('cli:command', { cmd: 'list' });
-      return { ok: true, message: '已在 Dock 中显示任务列表' };
+    case 'ls': {
+      // ✅ 主进程直接读取 tasks.json，不再依赖渲染层
+      const nodes = dataService.getAllNodes();
+      const activeBoard = dataService.getActiveBoard();
+      const boardName = activeBoard ? activeBoard.name : '无活跃看板';
+      const list = nodes.filter(function (n) { return !n.archived && n.status !== 'inbox'; })
+        .map(function (n) {
+          return { title: n.title, status: n.status, priority: n.priority, board: boardName };
+        });
+      return { ok: true, message: '当前看板：' + boardName + '（' + list.length + ' 项）', data: list };
+    }
 
     case 'complete':
-    case 'done':
-      if (!mainWindow) return { ok: false, error: '窗口未初始化' };
-      showWindow();
-      mainWindow.webContents.send('cli:command', { cmd: 'complete', match: msg.match });
-      return { ok: true, message: '已标记完成：' + msg.match };
+    case 'done': {
+      // 主进程直接标记完成，并通知渲染层
+      const found = dataService.cliCompleteTask(msg.match || '');
+      if (found.length > 0 && mainWindow) {
+        showWindow();
+        mainWindow.webContents.send('tasks:changed', { source: 'cli', action: 'complete', nodes: found });
+      }
+      return { ok: true, message: '已标记完成 ' + found.length + ' 个任务', data: found.map(function (n) { return n.title; }) };
+    }
 
     case 'recap':
       if (!mainWindow) return { ok: false, error: '窗口未初始化' };
@@ -442,6 +645,13 @@ if (!gotLock) {
 } else {
   app.on('second-instance', () => showWindow());
 
+  // 注入 agentBridge 的持久化回调：完成的 Agent 任务写入 agent-runs.json
+  // （通过 dataService.addAgentRun，避免 agentBridge 直接 require dataService 造成循环依赖）
+  agentBridge.setPersistence({
+    saveRun: function (run) { dataService.addAgentRun(run); },
+    loadRuns: function () { return dataService.getAgentRuns(); },
+  });
+
   app.whenReady().then(() => {
     installCSP();
     createWindow();
@@ -460,7 +670,9 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// 退出时注销所有全局快捷键
+// 退出时注销所有全局快捷键，并刷新待写入数据 + 清理 IPC token 文件
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+  dataService.flushAll();
+  try { fs.unlinkSync(tokenFilePath()); } catch (_) {}
 });

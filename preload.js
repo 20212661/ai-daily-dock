@@ -67,6 +67,38 @@ contextBridge.exposeInMainWorld('dock', {
     return () => ipcRenderer.removeListener('cli:command', handler);
   },
 
+  // 主进程 → 渲染层：任务数据被外部（CLI / 其他窗口）修改时通知刷新
+  onTasksChanged: (cb) => {
+    const handler = (_e, payload) => cb(payload);
+    ipcRenderer.on('tasks:changed', handler);
+    return () => ipcRenderer.removeListener('tasks:changed', handler);
+  },
+
+  // —— 数据层 API（主进程统一管理 tasks.json 等 JSON 文件）——
+  tasks: {
+    /** 从主进程加载全部任务数据（启动时调用） */
+    load: () => ipcRenderer.invoke('tasks:load'),
+    /** 保存任务数据到主进程（防抖写入 JSON 文件） */
+    save: (tasksData) => ipcRenderer.invoke('tasks:save', tasksData),
+    /** 立即保存（非防抖，用于关键操作） */
+    saveNow: (tasksData) => ipcRenderer.invoke('tasks:saveNow', tasksData),
+    /** 获取所有节点（跨所有看板） */
+    allNodes: () => ipcRenderer.invoke('tasks:allNodes'),
+    /** 统计 done/total */
+    counts: () => ipcRenderer.invoke('tasks:counts'),
+    /** 按 id 查节点 */
+    findNode: (id) => ipcRenderer.invoke('tasks:findNode', id),
+  },
+
+  // 通用数据文件读写（settings / recaps / agentRuns / modelConfig）
+  data: {
+    load: (name) => ipcRenderer.invoke('data:load', name),
+    save: (name, data) => ipcRenderer.invoke('data:save', name, data),
+    exportAll: () => ipcRenderer.invoke('data:export'),
+    importAll: (data) => ipcRenderer.invoke('data:import', data),
+    clearAll: () => ipcRenderer.invoke('data:clear'),
+  },
+
   // —— AI 能力（经主进程 IPC，Key 不暴露给渲染层）——
   ai: {
     /** 保存 API Key（主进程加密存储） */
@@ -79,7 +111,41 @@ contextBridge.exposeInMainWorld('dock', {
     setModel: (presetId, customUrl, customModel) => ipcRenderer.invoke('ai:setModel', presetId, customUrl, customModel),
     /** 任务拆解：输入指令 → 返回步骤草案（人审核后才执行） */
     draftSteps: (prompt, taskContext) => ipcRenderer.invoke('ai:draftSteps', prompt, taskContext),
+    /** 多模型头脑风暴：多个 AI 从不同角度分析问题，返回多份分析供人综合 */
+    brainstorm: (prompt, taskContext) => ipcRenderer.invoke('ai:brainstorm', prompt, taskContext),
+    /** 复制文本到剪贴板 */
+    copyToClipboard: (text) => ipcRenderer.invoke('clipboard:write', text),
+    /** 打开外部链接（网页版 AI） */
+    openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
+    /** 逐步执行：人点「用 AI 辅助这步」→ AI 返回该步结果供人审核 */
+    executeStep: (stepContext) => ipcRenderer.invoke('ai:executeStep', stepContext),
     /** 复盘建议 */
     recapAdvice: (doneTasks, missTasks) => ipcRenderer.invoke('ai:recapAdvice', doneTasks, missTasks),
+  },
+  /** Hermes 风格本地 Agent 桥接 */
+  agent: {
+    /** 检测本地已安装的 CLI Agent */
+    detect: () => ipcRenderer.invoke('agent:detect'),
+    /** 派活给本地 Agent（后台异步执行，返回 taskId） */
+    dispatch: (agentId, prompt, opts) => ipcRenderer.invoke('agent:dispatch', agentId, prompt, opts),
+    /** 查询 Agent 任务状态 */
+    status: (taskId) => ipcRenderer.invoke('agent:status', taskId),
+    /** 取消 Agent 任务 */
+    cancel: (taskId) => ipcRenderer.invoke('agent:cancel', taskId),
+    /** 列出所有运行中 Agent 任务 */
+    list: () => ipcRenderer.invoke('agent:list'),
+    /** Agent 运行历史（持久化，按时间倒序） */
+    runs: () => ipcRenderer.invoke('agent:runs'),
+    /** 按 taskId 查单条历史记录 */
+    run: (taskId) => ipcRenderer.invoke('agent:run', taskId),
+  },
+
+  // —— 开机自启 ——
+  getLoginItem: () => ipcRenderer.invoke('app:getLoginItem'),
+  setLoginItem: (on) => ipcRenderer.invoke('app:setLoginItem', !!on),
+
+  // —— 复盘快照（规范化列表）——
+  recaps: {
+    list: () => ipcRenderer.invoke('recaps:list'),
   }
 });

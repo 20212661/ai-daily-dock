@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent 任务详情 · 拆解 SeeAgent MVP · AI Daily Dock</title>
+<title>Agent 任务详情 · AI Daily Dock</title>
 <link rel="stylesheet" href="css/dock.css">
 <style>
   /* tokens / reset / 画布背景 → css/dock.css */
@@ -97,115 +97,205 @@
     <header class="panel__head">
       <a class="back" href="dock.html">← 返回 Dock</a>
       <div class="htop">
-        <div class="panel__title">拆解 SeeAgent MVP</div>
-        <span class="pill pill--ai"><span class="pd"></span>执行中</span>
+        <div class="panel__title" id="pageTitle">Agent 任务详情</div>
+        <span class="pill" id="pagePill"><span class="pd"></span>—</span>
       </div>
-      <div class="meta">
-        <span><span class="live"></span>Agent <b>SeeAgent-Planner-v2</b></span>
-        <span>创建 <b>09:15</b></span>
-        <span>已运行 <b>8 min</b></span>
-        <span>预计还需 <b>3 min</b></span>
-      </div>
+      <div class="meta" id="pageMeta"></div>
     </header>
 
-    <div class="panel__body">
-
-      <!-- 原始指令 -->
-      <section class="sec">
-        <div class="sec__h">原始指令</div>
-        <div class="quote">帮我把 SeeAgent 的开发计划拆成今天可以完成的任务</div>
-        <div class="relate">↳ 关联今日重点 · <a href="dock.html">完成 SeeAgent 今日开发计划拆解</a></div>
-      </section>
-
-      <!-- 执行步骤 -->
-      <section class="sec">
-        <div class="sec__h">执行步骤</div>
-        <div class="tl">
-          <div class="step step--done">
-            <span class="step__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>
-            <div><div class="step__txt">接收任务 · 解析用户意图</div></div>
-            <span class="step__time">09:15</span>
-          </div>
-          <div class="step step--done">
-            <span class="step__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>
-            <div>
-              <div class="step__txt">读取项目上下文</div>
-              <div class="step__log">已加载 README.md · roadmap.md · 3 个已有模块定义</div>
-            </div>
-            <span class="step__time">09:16</span>
-          </div>
-          <div class="step step--active">
-            <span class="step__dot"><span class="spinner"></span></span>
-            <div>
-              <div class="step__txt">正在生成模块列表</div>
-              <div class="step__log">已识别 4 / 6 个核心模块 · 正在分析依赖关系…</div>
-            </div>
-            <span class="step__time">09:18</span>
-          </div>
-          <div class="step step--pending">
-            <span class="step__dot"></span><div><div class="step__txt">生成任务依赖与优先级</div></div><span class="step__time">-</span>
-          </div>
-          <div class="step step--pending">
-            <span class="step__dot"></span><div><div class="step__txt">估算每项任务工时</div></div><span class="step__time">-</span>
-          </div>
-          <div class="step step--pending">
-            <span class="step__dot"></span><div><div class="step__txt">输出今日可执行任务清单</div></div><span class="step__time">-</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- 已识别模块（中间产出） -->
-      <section class="sec">
-        <div class="sec__h">已识别模块 · 中间产出</div>
-        <div class="mod"><span class="mod__n">1</span><div class="mod__b"><div class="mod__t">任务调度引擎</div><div class="mod__d">解析自然语言指令、分派给子 Agent、聚合结果</div></div><span class="mod__c">约 5 项</span></div>
-        <div class="mod"><span class="mod__n">2</span><div class="mod__b"><div class="mod__t">Agent 执行沙箱</div><div class="mod__d">隔离运行环境、超时控制与失败重试</div></div><span class="mod__c">约 4 项</span></div>
-        <div class="mod"><span class="mod__n">3</span><div class="mod__b"><div class="mod__t">状态持久化</div><div class="mod__d">localStorage 本地存储 + 多端同步骨架</div></div><span class="mod__c">约 3 项</span></div>
-        <div class="mod"><span class="mod__n">4</span><div class="mod__b"><div class="mod__t">桌面集成</div><div class="mod__d">置顶 · 边缘吸附 · 托盘 · 快捷键</div></div><span class="mod__c">约 3 项</span></div>
-      </section>
-
-      <!-- 运行参数 -->
-      <section class="sec">
-        <div class="sec__h">运行参数</div>
-        <div class="params">
-          <div class="param"><div class="k">模型</div><div class="v sans">SeeAgent-Planner-v2</div></div>
-          <div class="param"><div class="k">温度</div><div class="v">0.3</div></div>
-          <div class="param"><div class="k">最大步数</div><div class="v">12</div></div>
-          <div class="param"><div class="k">预计花费</div><div class="v">≈ $0.04</div></div>
-          <div class="param" style="grid-column:1/-1"><div class="k">可用工具</div><div class="v sans" style="font-size:12px">文件搜索 · 日历 · 代码库检索 · 任务看板</div></div>
-        </div>
-      </section>
-
-      <!-- 运行历史 -->
-      <section class="sec">
-        <div class="sec__h">运行历史</div>
-        <div class="run"><span class="run__d">06/13 18:30</span><span class="pill pill--fail"><span class="pd"></span>失败</span><span class="run__r">超时 · 步数耗尽（<b>9 min</b>）</span></div>
-        <div class="run"><span class="run__d">06/12 14:00</span><span class="pill pill--done"><span class="pd"></span>已完成</span><span class="run__r">生成 <b>7 项</b>可执行任务（<b>6 min</b>）</span></div>
-        <div class="run"><span class="run__d">06/10 09:45</span><span class="pill pill--done"><span class="pd"></span>已完成</span><span class="run__r">生成 <b>5 项</b>可执行任务（<b>5 min</b>）</span></div>
-      </section>
-
+    <div class="panel__body" id="pageBody">
+      <!-- 列表态 / 详情态由 JS 动态渲染 -->
+      <div style="padding:30px;text-align:center;color:var(--muted);font-size:12px"><span class="spinner" style="width:22px;height:22px;margin-bottom:10px"></span><div>加载中…</div></div>
     </div>
 
-    <footer class="panel__foot">
-      <button class="btn btn--primary" data-act="wait">继续等待</button>
-      <button class="btn btn--ghost" data-act="pause">暂停</button>
-      <button class="btn btn--ghost" data-act="poke">催一下</button>
-      <button class="btn btn--ghost" data-act="log">查看日志</button>
-      <button class="btn btn--soft" data-act="del">删除</button>
+    <footer class="panel__foot" id="pageFoot">
+      <button class="btn btn--ghost" data-act="back-list" style="flex:1">返回列表</button>
     </footer>
   </main>
 </div>
 
 <script>
 (function(){
+  var $=function(s,r){return (r||document).querySelector(s);};
+  function esc(s){s=String(s==null?'':s);return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   function toast(msg){
-    const t=document.createElement('div');
+    var t=document.createElement('div');
     t.textContent=msg;
     Object.assign(t.style,{position:'fixed',left:'50%',bottom:'28px',transform:'translateX(-50%)',background:'rgba(34,36,54,0.92)',color:'#fff',fontFamily:'inherit',fontSize:'12px',fontWeight:'500',padding:'9px 14px',borderRadius:'12px',boxShadow:'0 14px 32px -10px rgba(40,42,80,0.45)',zIndex:'60',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.12)',opacity:'0',transition:'opacity .25s, transform .25s'});
-    document.body.appendChild(t); requestAnimationFrame(()=>{t.style.opacity='1'});
-    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';setTimeout(()=>t.remove(),300)},2000);
+    document.body.appendChild(t); requestAnimationFrame(function(){t.style.opacity='1';});
+    setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';setTimeout(function(){t.remove();},300);},2000);
   }
-  const M={wait:'好的，继续等待 Agent · 完成后会提醒你',pause:'已暂停 Agent（演示）',poke:'已提醒 Agent 加速 · 预计提前 1 min',log:'打开运行日志（演示）',del:'已将该任务移到回收站'};
-  document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>toast(M[b.dataset.act])));
+  // 状态徽标
+  function pillFor(status){
+    var m={running:{cls:'pill--ai',txt:'执行中'},done:{cls:'pill--done',txt:'已完成'},failed:{cls:'pill--fail',txt:'失败'},error:{cls:'pill--fail',txt:'出错'},cancelled:{cls:'pill--todo',txt:'已取消'},unknown:{cls:'pill--todo',txt:'未知'}};
+    var v=m[status]||m.unknown;
+    return '<span class="pill '+v.cls+'"><span class="pd"></span>'+v.txt+'</span>';
+  }
+  // 时间格式化
+  function fmtTime(iso){ if(!iso) return '-'; try{var d=new Date(iso);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0');}catch(e){return '-';} }
+  function fmtDuration(a,b){ if(!a||!b) return '-'; var ms=new Date(b)-new Date(a); if(isNaN(ms)||ms<0) return '-'; var s=Math.round(ms/1000); if(s<60) return s+'s'; var m=Math.floor(s/60); return m+'m '+(s%60)+'s'; }
+
+  var queryParams=new URLSearchParams(location.search);
+  var detailId=queryParams.get('id');
+  var pollTimer=null;
+
+  // —— 列表态：渲染历史 + 运行中 ——
+  function renderList(){
+    $('#pageTitle').textContent='Agent 运行历史';
+    $('#pagePill').outerHTML='<span class="pill pill--todo" id="pagePill"><span class="pd"></span>历史</span>';
+    $('#pageMeta').innerHTML='';
+    $('#pageFoot').style.display='none';
+
+    if(!window.dock||!window.dock.agent){
+      $('#pageBody').innerHTML=emptyState('需在桌面应用中运行');
+      return;
+    }
+    Promise.all([
+      window.dock.agent.runs(),
+      window.dock.agent.list()
+    ]).then(function(res){
+      var runs=(res[0]&&res[0].ok&&res[0].runs)||[];
+      var running=(res[1]&&res[1].ok&&res[1].tasks)||[];
+      var html='';
+      // 运行中
+      if(running.length>0){
+        html+='<div class="sec__h" style="margin-bottom:10px"><span class="live" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--info);margin-right:5px;vertical-align:middle"></span>运行中（'+running.length+'）</div>';
+        running.forEach(function(t){
+          html+='<a class="mod" style="text-decoration:none;color:inherit;cursor:pointer" href="agent-detail.html?id='+esc(t.taskId)+'">'
+            +'<span class="mod__n">▶</span>'
+            +'<div class="mod__b"><div class="mod__t">'+esc(t.agent)+' · '+esc((t.prompt||'').slice(0,40))+'</div>'
+            +'<div class="mod__d">'+fmtTime(t.startTime)+' 起</div></div>'
+            +pillFor(t.status)+'</a>';
+        });
+        html+='<div style="height:14px"></div>';
+      }
+      // 历史
+      html+='<div class="sec__h" style="margin-bottom:10px">历史记录（'+runs.length+'）</div>';
+      if(runs.length===0){
+        html+=emptyState('还没有 Agent 运行记录<br>去 Dock 给任务派活后，完成的记录会出现在这里');
+      } else {
+        runs.forEach(function(r){
+          html+='<a class="mod" style="text-decoration:none;color:inherit;cursor:pointer" href="agent-detail.html?id='+esc(r.taskId)+'">'
+            +'<span class="mod__n">'+esc((r.prompt||'?').slice(0,1))+'</span>'
+            +'<div class="mod__b"><div class="mod__t">'+esc((r.prompt||'未命名任务').slice(0,50))+'</div>'
+            +'<div class="mod__d">'+esc(r.agent)+' · '+fmtTime(r.startTime)+'</div></div>'
+            +pillFor(r.status)+'</a>';
+        });
+      }
+      $('#pageBody').innerHTML=html;
+    }).catch(function(e){
+      $('#pageBody').innerHTML=emptyState('加载失败：'+esc(e.message||e));
+    });
+  }
+
+  function emptyState(msg){
+    return '<div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7">'+msg+'</div>';
+  }
+
+  // —— 详情态：渲染单次运行 ——
+  function renderDetail(taskId){
+    if(!window.dock||!window.dock.agent){ $('#pageBody').innerHTML=emptyState('需在桌面应用中运行'); return; }
+    // 先查历史，再查运行中（运行中需要轮询）
+    window.dock.agent.run(taskId).then(function(histR){
+      if(histR&&histR.ok&&histR.run){
+        renderRunDetail(histR.run, false);
+      } else {
+        // 不在历史 → 可能正在运行
+        window.dock.agent.status(taskId).then(function(sr){
+          if(sr&&sr.ok){
+            renderRunDetail(sr, true); // true = 运行中，需轮询
+          } else {
+            $('#pageTitle').textContent='记录不存在';
+            $('#pageBody').innerHTML=emptyState('找不到该 Agent 任务记录<br><a href="agent-detail.html" style="color:var(--ink)">返回列表</a>');
+          }
+        });
+      }
+    });
+  }
+
+  function renderRunDetail(run, isRunning){
+    $('#pageTitle').textContent=(run.prompt||'Agent 任务').slice(0,30)+((run.prompt&&run.prompt.length>30)?'…':'');
+    $('#pagePill').outerHTML=pillFor(run.status).replace('<span class="pill','<span class="pill" id="pagePill"');
+    // meta
+    var metaHtml='<span>Agent <b>'+esc(run.agent||'-')+'</b></span>'
+      +'<span>开始 <b>'+fmtTime(run.startTime)+'</b></span>'
+      +'<span>耗时 <b>'+fmtDuration(run.startTime,run.endTime)+'</b></span>';
+    if(run.exitCode!=null) metaHtml+='<span>退出码 <b>'+run.exitCode+'</b></span>';
+    $('#pageMeta').innerHTML=metaHtml;
+
+    var body='';
+    // 原始指令
+    body+='<section class="sec"><div class="sec__h">原始指令</div><div class="quote">'+esc(run.prompt||'(无)')+'</div></section>';
+    // 输出
+    body+='<section class="sec"><div class="sec__h">'+(isRunning?'实时输出':'输出结果')+'</div>';
+    if(run.output){
+      body+='<pre style="font-family:var(--num);font-size:10.5px;line-height:1.5;color:var(--fg);background:var(--card-2);border:1px solid var(--hair);border-radius:var(--r-sub);padding:10px 12px;max-height:50vh;overflow:auto;white-space:pre-wrap;word-break:break-word;margin:0">'+esc(run.output)+'</pre>';
+    } else if(isRunning){
+      body+='<div style="padding:14px;text-align:center"><span class="spinner" style="width:18px;height:18px;margin-bottom:8px"></span><div style="font-size:11px;color:var(--muted)">Agent 执行中…</div></div>';
+    } else {
+      body+='<div style="padding:14px;font-size:11px;color:var(--muted)">（无输出）</div>';
+    }
+    body+='</section>';
+    // 运行参数
+    body+='<section class="sec"><div class="sec__h">运行参数</div><div class="params">'
+      +'<div class="param"><div class="k">Agent</div><div class="v sans">'+esc(run.agent||'-')+'</div></div>'
+      +'<div class="param"><div class="k">状态</div><div class="v sans">'+esc(run.status||'-')+'</div></div>'
+      +'<div class="param"><div class="k">开始</div><div class="v">'+fmtTime(run.startTime)+'</div></div>'
+      +'<div class="param"><div class="k">结束</div><div class="v">'+fmtTime(run.endTime)+'</div></div>'
+      +'<div class="param" style="grid-column:1/-1"><div class="k">工作目录</div><div class="v sans" style="font-size:11px;word-break:break-all">'+esc(run.cwd||'-')+'</div></div>'
+      +'</div></section>';
+    $('#pageBody').innerHTML=body;
+
+    // 底部按钮
+    var foot='<button class="btn btn--ghost" data-act="back-list" style="flex:1">返回列表</button>';
+    if(isRunning){ foot+='<button class="btn btn--soft" data-act="cancel" data-task="'+esc(run.taskId)+'" style="flex:1">取消任务</button>'; }
+    foot+='<button class="btn btn--primary" data-act="copy" data-output="'+esc((run.output||'').slice(0,4000))+'" style="flex:1">复制输出</button>';
+    $('#pageFoot').innerHTML=foot;
+    $('#pageFoot').style.display='flex';
+
+    // 运行中 → 轮询
+    if(isRunning){ startPolling(run.taskId); } else { stopPolling(); }
+  }
+
+  function startPolling(taskId){
+    stopPolling();
+    var cnt=0;
+    pollTimer=setInterval(function(){
+      cnt++;
+      window.dock.agent.status(taskId).then(function(sr){
+        if(!sr||!sr.ok) return;
+        if(sr.status==='done'||sr.status==='failed'||sr.status==='error'||sr.status==='cancelled'){
+          stopPolling();
+          renderRunDetail(sr, false);
+          toast('Agent 已结束 · '+sr.status);
+        } else if(cnt%3===0){
+          // 每 6s 刷新一次输出（避免太频繁）
+          renderRunDetail(sr, true);
+        }
+      });
+      if(cnt>120){ stopPolling(); } // 4 分钟超时
+    },2000);
+  }
+  function stopPolling(){ if(pollTimer){ clearInterval(pollTimer); pollTimer=null; } }
+
+  // 底部按钮
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('[data-act]'); if(!btn) return;
+    var act=btn.dataset.act;
+    if(act==='back-list'){ stopPolling(); location.href='agent-detail.html'; }
+    else if(act==='cancel'){
+      var tid=btn.dataset.task;
+      if(window.dock.agent.cancel){ window.dock.agent.cancel(tid).then(function(r){ toast(r&&r.ok?'已取消任务':'取消失败'); if(r&&r.ok) setTimeout(function(){location.reload();},500); }); }
+    }
+    else if(act==='copy'){
+      var txt=btn.dataset.output||'';
+      if(window.dock.ai&&window.dock.ai.copyToClipboard){ window.dock.ai.copyToClipboard(txt).then(function(){toast('已复制输出');}); }
+      else if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(function(){toast('已复制输出');}); }
+    }
+  });
+
+  // 启动
+  if(detailId){ renderDetail(detailId); } else { renderList(); }
 })();
 </script>
 </body>

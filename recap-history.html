@@ -101,166 +101,12 @@
       <div class="panel__sub">按日期归档的每日复盘</div>
     </header>
 
-    <div class="panel__body">
-
-      <!-- 编辑式总览 -->
-      <section class="overview" aria-label="本周总览">
-        <div class="ov__hero">
-          <div class="ov__big">19<small>/42</small></div>
-          <div class="ov__cap">本周已完成，完成率 <b>45%</b>，连续 <b>6 天</b></div>
-        </div>
-        <div class="ov__inline">
-          <div class="m"><b>11</b><span>AI 协作（项）</span></div>
-          <div class="m"><b>8h 24m</b><span>总专注</span></div>
-          <div class="m"><b>1h 12m</b><span>日均专注</span></div>
-        </div>
-      </section>
-
-      <!-- 趋势 -->
-      <section class="trend" aria-label="近 7 天完成趋势">
-        <div class="trend__cap"><span>近 7 天每日完成数</span><span>今天 <b>3</b></span></div>
-        <div class="chart">
-          <div class="col"><div class="cnt">5</div><div class="bar" style="height:71%"></div><div class="dl">一<br>06/08</div></div>
-          <div class="col"><div class="cnt">4</div><div class="bar" style="height:57%"></div><div class="dl">二<br>06/09</div></div>
-          <div class="col"><div class="cnt">3</div><div class="bar" style="height:43%"></div><div class="dl">三<br>06/10</div></div>
-          <div class="col rest"><div class="cnt">0</div><div class="bar" style="height:6%"></div><div class="dl">四<br>06/11</div></div>
-          <div class="col"><div class="cnt">4</div><div class="bar" style="height:57%"></div><div class="dl">五<br>06/12</div></div>
-          <div class="col rest"><div class="cnt">0</div><div class="bar" style="height:6%"></div><div class="dl">六<br>06/13</div></div>
-          <div class="col today"><div class="cnt">3</div><div class="bar" style="height:43%"></div><div class="dl">日<br>06/14</div></div>
-        </div>
-      </section>
-
-      <!-- 每日复盘列表 -->
-      <section class="archive" aria-label="每日复盘">
-        <div class="archive__cap">每日复盘</div>
-
-        <div class="entry is-today open" data-entry>
-          <div class="entry__head">
-            <div class="entry__date"><b>06/14</b><span>今天 · 周日</span></div>
-            <div class="entry__mid"><div class="entry__hi">整理 OpenDesign 提示词已归档，SeeAgent 拆解执行中</div></div>
-            <span class="pill pill--now">进行中</span>
-            <span class="entry__rate"><b>3</b>/8</span>
-            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-          <div class="entry__body"><div class="entry__inner">
-            <div class="blk"><div class="h">完成事项</div>
-              <div class="li"><span class="mk">✓</span><span>整理 OpenDesign 产品原型提示词，<b>已归档</b></span></div>
-              <div class="li"><span class="mk">✓</span><span>晨间计划整理，派 2 件给 AI</span></div>
-              <div class="li"><span class="mk">✓</span><span>整理桌面悬浮 AI 面板需求，进度 <b>62%</b></span></div>
-            </div>
-            <div class="blk"><div class="h">未完成与原因</div>
-              <div class="li miss"><span class="mk">·</span><span><b>SeeAgent 开发计划拆解</b>，深度任务，需要整块专注时间</span></div>
-              <div class="li miss"><span class="mk">·</span><span><b>SRAM-CIM Figure 5</b>，被导师邮件打断，延迟 12 min</span></div>
-            </div>
-            <div class="blk"><div class="h">明日建议</div>
-              <div class="li"><span class="mk">→</span><span>SeeAgent 原型设计提前到上午；论文精读挪到 10:00 前。</span></div>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="entry" data-entry>
-          <div class="entry__head">
-            <div class="entry__date"><b>06/13</b><span>昨天 · 周六</span></div>
-            <div class="entry__mid"><div class="entry__hi">见 Agent 原型主流程定稿，论文 Figure 4 精读完成</div></div>
-            <span class="entry__rate"><b>4</b>/7</span>
-            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-          <div class="entry__body"><div class="entry__inner">
-            <div class="blk"><div class="h">完成事项</div>
-              <div class="li"><span class="mk">✓</span><span>见 Agent 原型主流程定稿，3 个核心界面</span></div>
-              <div class="li"><span class="mk">✓</span><span>SRAM-CIM Figure 4 精读，能耗对比表整理</span></div>
-              <div class="li"><span class="mk">✓</span><span>提示词体系 v2 草稿评审</span></div>
-            </div>
-            <div class="blk"><div class="h">明日建议</div>
-              <div class="li"><span class="mk">→</span><span>把 Figure 5 提前，避免下午被打断。</span></div>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="entry" data-entry>
-          <div class="entry__head">
-            <div class="entry__date"><b>06/12</b><span>周五</span></div>
-            <div class="entry__mid"><div class="entry__hi">见 Agent 调度引擎骨架通过，AI 协作 3 项</div></div>
-            <span class="entry__rate"><b>4</b>/6</span>
-            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-          <div class="entry__body"><div class="entry__inner">
-            <div class="blk"><div class="h">完成事项</div>
-              <div class="li"><span class="mk">✓</span><span>调度引擎骨架，单测通过</span></div>
-              <div class="li"><span class="mk">✓</span><span>Agent 沙箱接口定义</span></div>
-            </div>
-            <div class="blk"><div class="h">未完成与原因</div>
-              <div class="li miss"><span class="mk">·</span><span><b>状态持久化</b>，等待同步方案决策</span></div>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="entry" data-entry>
-          <div class="entry__head">
-            <div class="entry__date"><b>06/11</b><span>周四</span></div>
-            <div class="entry__mid"><div class="entry__hi">休息日，全天未安排任务</div></div>
-            <span class="pill pill--rest">休息</span>
-            <span class="entry__rate"><b>0</b>/5</span>
-            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-          <div class="entry__body"><div class="entry__inner">
-            <div class="blk"><div class="h">备注</div>
-              <div class="li"><span class="mk">·</span><span>主动休息日，连续打卡重置提示已忽略。</span></div>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="entry" data-entry>
-          <div class="entry__head">
-            <div class="entry__date"><b>06/10</b><span>周三</span></div>
-            <div class="entry__mid"><div class="entry__hi">提示词体系 v2 起草，完成 3/6</div></div>
-            <span class="entry__rate"><b>3</b>/6</span>
-            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-          <div class="entry__body"><div class="entry__inner">
-            <div class="blk"><div class="h">完成事项</div>
-              <div class="li"><span class="mk">✓</span><span>提示词体系 v2 起草，6 类</span></div>
-              <div class="li"><span class="mk">✓</span><span>论文 Figure 1-3 复习</span></div>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="entry" data-entry>
-          <div class="entry__head">
-            <div class="entry__date"><b>06/09</b><span>周二</span></div>
-            <div class="entry__mid"><div class="entry__hi">完成 SRAM-CIM Figure 1-3 精读，AI 协作 2 项</div></div>
-            <span class="entry__rate"><b>4</b>/6</span>
-            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-          <div class="entry__body"><div class="entry__inner">
-            <div class="blk"><div class="h">完成事项</div>
-              <div class="li"><span class="mk">✓</span><span>SRAM-CIM Figure 1-3 精读，笔记 9 条</span></div>
-              <div class="li"><span class="mk">✓</span><span>见 Agent 需求清单整理</span></div>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="entry" data-entry>
-          <div class="entry__head">
-            <div class="entry__date"><b>06/08</b><span>周一</span></div>
-            <div class="entry__mid"><div class="entry__hi">本周启动，见 Agent 需求评审，完成 5/7</div></div>
-            <span class="entry__rate"><b>5</b>/7</span>
-            <span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-          </div>
-          <div class="entry__body"><div class="entry__inner">
-            <div class="blk"><div class="h">完成事项</div>
-              <div class="li"><span class="mk">✓</span><span>见 Agent 需求评审，4 个核心场景</span></div>
-              <div class="li"><span class="mk">✓</span><span>本周计划制定，派 6 件给 AI</span></div>
-            </div>
-          </div></div>
-        </div>
-
-      </section>
-
+    <div class="panel__body" id="pageBody">
+      <div style="padding:30px;text-align:center;color:var(--muted);font-size:12px"><span class="spinner" style="width:22px;height:22px;margin-bottom:10px"></span><div>加载中…</div></div>
     </div>
 
     <footer class="panel__foot">
-      <button class="btn btn--primary" id="export">导出本周复盘</button>
+      <button class="btn btn--primary" id="export">导出全部复盘</button>
       <a class="btn btn--ghost" href="dock.html">回到今天</a>
     </footer>
   </main>
@@ -268,12 +114,167 @@
 
 <script>
 (function(){
-  document.querySelectorAll('[data-entry]').forEach(en=>{
-    en.querySelector('.entry__head').addEventListener('click',()=>en.classList.toggle('open'));
-  });
-  document.getElementById('export').addEventListener('click',()=>{
-    function toast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'fixed',left:'50%',bottom:'28px',transform:'translateX(-50%)',background:'rgba(34,36,54,0.92)',color:'#fff',fontFamily:'inherit',fontSize:'12px',fontWeight:'500',padding:'9px 14px',borderRadius:'12px',boxShadow:'0 14px 32px -10px rgba(40,42,80,0.45)',zIndex:'60',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.12)',opacity:'0',transition:'opacity .25s, transform .25s'});document.body.appendChild(t);requestAnimationFrame(()=>t.style.opacity='1');setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';setTimeout(()=>t.remove(),300)},2000)}
-    toast('已导出本周复盘 recap-06-08_06-14.md');
+  var $=function(s,r){return (r||document).querySelector(s);};
+  function esc(s){s=String(s==null?'':s);return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function toast(msg){
+    var t=document.createElement('div');
+    t.textContent=msg;
+    Object.assign(t.style,{position:'fixed',left:'50%',bottom:'28px',transform:'translateX(-50%)',background:'rgba(34,36,54,0.92)',color:'#fff',fontFamily:'inherit',fontSize:'12px',fontWeight:'500',padding:'9px 14px',borderRadius:'12px',boxShadow:'0 14px 32px -10px rgba(40,42,80,0.45)',zIndex:'60',backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.12)',opacity:'0',transition:'opacity .25s, transform .25s'});
+    document.body.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1';});
+    setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';setTimeout(function(){t.remove();},300);},2000);
+  }
+  // 日期工具
+  function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function dateLabel(dateStr){ // 'MM/DD'
+    if(!dateStr) return '';
+    var p=dateStr.split('-'); return p[1]+'/'+p[2];
+  }
+  var WEEKDAYS=['日','一','二','三','四','五','六'];
+  function weekdayLabel(dateStr){var d=new Date(dateStr+'T00:00:00');return isNaN(d)?'':WEEKDAYS[d.getDay()];}
+  function relativeDay(dateStr){
+    var today=todayStr();
+    if(dateStr===today) return '今天';
+    var y=new Date(today+'T00:00:00'); y.setDate(y.getDate()-1);
+    if(dateStr===y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0')) return '昨天';
+    return '周'+weekdayLabel(dateStr);
+  }
+
+  function emptyState(msg){
+    return '<div style="padding:50px 24px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.8">'+msg+'</div>';
+  }
+
+  function render(items){
+    if(!items||items.length===0){
+      $('#pageBody').innerHTML=emptyState('还没有历史复盘<br>去 Dock 生成今日复盘并点击「归档」后，记录会出现在这里<br><br><a href="dock.html" style="color:var(--ink);font-weight:600">打开 Dock →</a>');
+      return;
+    }
+
+    // —— 总览 ——
+    var totalDone=0, totalAll=0, totalAi=0;
+    items.forEach(function(it){ totalDone+=it.doneCount||0; totalAll+=it.totalCount||0; totalAi+=it.aiCount||0; });
+    var rate=totalAll>0?Math.round(totalDone/totalAll*100):0;
+    var streak=calcStreak(items);
+    var ov='<section class="overview"><div class="ov__hero">'
+      +'<div class="ov__big">'+totalDone+'<small>/'+totalAll+'</small></div>'
+      +'<div class="ov__cap">累计已完成，完成率 <b>'+rate+'%</b>，连续 <b>'+streak+' 天</b></div></div>'
+      +'<div class="ov__inline"><div class="m"><b>'+totalAi+'</b><span>AI 协作（项）</span></div>'
+      +'<div class="m"><b>'+items.length+'</b><span>复盘记录</span></div></div></section>';
+
+    // —— 7 天趋势 ——
+    var trend='<section class="trend"><div class="trend__cap"><span>近 7 天每日完成数</span><span>今天 <b>'+(findByDate(items,todayStr())?findByDate(items,todayStr()).doneCount:0)+'</b></span></div><div class="chart">';
+    var maxCnt=1;
+    var days=last7Days();
+    days.forEach(function(d){ var it=findByDate(items,d.date); var c=it?it.doneCount:0; if(c>maxCnt)maxCnt=c; });
+    days.forEach(function(d){
+      var it=findByDate(items,d.date); var c=it?it.doneCount:0;
+      var pct=Math.max(6, Math.round(c/maxCnt*100));
+      var cls=d.date===todayStr()?'col today':(c===0?'col rest':'col');
+      trend+='<div class="'+cls+'"><div class="cnt">'+c+'</div><div class="bar" style="height:'+pct+'%"></div><div class="dl">'+weekdayLabel(d.date)+'<br>'+dateLabel(d.date)+'</div></div>';
+    });
+    trend+='</div></section>';
+
+    // —— 每日复盘列表 ——
+    var list='<section class="archive"><div class="archive__cap">每日复盘（'+items.length+'）</div>';
+    items.forEach(function(it,idx){
+      var isOpen=(idx===0); // 默认展开第一条
+      var pillHtml='';
+      if(it.date===todayStr()){ pillHtml='<span class="pill pill--now">今日</span>'; }
+      else if((it.doneCount||0)===0){ pillHtml='<span class="pill pill--rest">休息</span>'; }
+      // entry head
+      list+='<div class="entry'+(isOpen?' open':'')+'" data-entry>'
+        +'<div class="entry__head">'
+        +'<div class="entry__date"><b>'+dateLabel(it.date)+'</b><span>'+relativeDay(it.date)+' · 周'+weekdayLabel(it.date)+'</span></div>'
+        +'<div class="entry__mid"><div class="entry__hi">'+esc(it.summary||'')+'</div></div>'
+        +pillHtml
+        +'<span class="entry__rate"><b>'+(it.doneCount||0)+'</b>/'+(it.totalCount||0)+'</span>'
+        +'<span class="entry__chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>'
+        +'</div><div class="entry__body"><div class="entry__inner">';
+      // 完成事项
+      if(it.doneTasks&&it.doneTasks.length){
+        list+='<div class="blk"><div class="h">完成事项</div>';
+        it.doneTasks.forEach(function(t){ list+='<div class="li"><span class="mk">✓</span><span>'+esc(t.title)+(t.desc&&t.desc!=='双击写点什么'?' · <b>'+esc(t.desc)+'</b>':'')+'</span></div>'; });
+        list+='</div>';
+      }
+      // 未完成与原因
+      if(it.missTasks&&it.missTasks.length){
+        list+='<div class="blk"><div class="h">未完成与原因</div>';
+        it.missTasks.forEach(function(t){
+          list+='<div class="li miss"><span class="mk">·</span><span><b>'+esc(t.title)+'</b>'+(t.reason?'，'+esc(t.reason):(t.desc&&t.desc!=='双击写点什么'?'，'+esc(t.desc):''))+'</span></div>';
+        });
+        list+='</div>';
+      }
+      // 明日建议
+      if(it.advice){
+        list+='<div class="blk"><div class="h">明日建议</div>';
+        it.advice.split('\n').forEach(function(line){ if(line.trim()) list+='<div class="li"><span class="mk">→</span><span>'+esc(line.trim())+'</span></div>'; });
+        list+='</div>';
+      }
+      list+='</div></div></div>';
+    });
+    list+='</section>';
+
+    $('#pageBody').innerHTML=ov+trend+list;
+
+    // 绑定展开/收起
+    document.querySelectorAll('[data-entry]').forEach(function(en){
+      var head=en.querySelector('.entry__head');
+      if(head) head.addEventListener('click',function(){ en.classList.toggle('open'); });
+    });
+  }
+
+  // 工具：最近7天（含今天，从6天前到今天）
+  function last7Days(){
+    var arr=[]; var d=new Date();
+    for(var i=6;i>=0;i--){
+      var dd=new Date(d); dd.setDate(dd.getDate()-i);
+      arr.push({date:dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0')});
+    }
+    return arr;
+  }
+  function findByDate(items,dateStr){
+    for(var i=0;i<items.length;i++){ if(items[i].date===dateStr) return items[i]; }
+    return null;
+  }
+  // 连续天数（从今天往前，有记录就算）
+  function calcStreak(items){
+    var set={}; items.forEach(function(it){ set[it.date]=true; });
+    var streak=0; var d=new Date();
+    for(var i=0;i<365;i++){
+      var dd=new Date(d); dd.setDate(dd.getDate()-i);
+      var ds=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
+      if(set[ds]) streak++; else if(i>0) break; // 今天没记录不算断，但昨天没就断
+    }
+    return streak;
+  }
+
+  // —— 加载数据 ——
+  if(window.dock&&window.dock.recaps&&window.dock.recaps.list){
+    window.dock.recaps.list().then(function(r){
+      render((r&&r.ok&&r.items)||[]);
+    }).catch(function(e){ $('#pageBody').innerHTML=emptyState('加载失败：'+esc(e.message||e)); });
+  } else if(window.dock&&window.dock.data){
+    // 兼容：用通用 data:load
+    window.dock.data.load('recaps').then(function(r){
+      var items=[];
+      if(r&&r.ok&&r.data){ if(Array.isArray(r.data))items=r.data; else if(Array.isArray(r.data.items))items=r.data.items; }
+      render(items);
+    }).catch(function(){ render([]); });
+  } else {
+    render([]);
+  }
+
+  // 导出
+  document.getElementById('export').addEventListener('click',function(){
+    if(window.dock&&window.dock.recaps&&window.dock.recaps.list){
+      window.dock.recaps.list().then(function(r){
+        var items=(r&&r.ok&&r.items)||[];
+        var blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json'});
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a'); a.href=url; a.download='recaps-'+todayStr()+'.json';
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        toast('已导出 '+items.length+' 条复盘');
+      });
+    } else { toast('需在桌面应用中运行'); }
   });
 })();
 </script>

@@ -2,20 +2,104 @@
 
 把 Open Design 生成的 **Web Prototype**（桌面悬浮 AI 协作计划面板）改造成 **Windows 桌面悬浮应用**。
 
+---
+
+## 🚀 快速启动
+
+### 1. 启动桌面应用
+```bash
+npm install
+npm start          # 或 npx electron .
+```
+
+### 2. 启动 AI 分发规划服务（可选，用于智能分发台）
+```bash
+cd agent-server
+npm install
+# 设置 API Key（DeepSeek 或其他 OpenAI 兼容服务）
+set PI_API_KEY=你的API密钥
+# 或 set DEEPSEEK_API_KEY=你的DeepSeek密钥
+npm run dev
+```
+服务启动后访问 http://localhost:3874/api/health 检查状态。
+
+如果不启动 agent-server，AI 分发台会自动降级为三步法头脑风暴模式。
+
+---
+
+## 📋 项目结构
+
+| 文件/目录 | 说明 |
+| --- | --- |
+| `dock.html` | 主面板 UI（单文件，HTML+CSS+JS；含 compact/board/expanded/focus 四态切换与白板交互） |
+| `main.js` | Electron 主进程（建窗、托盘、IPC、安全加固、CLI named-pipe 服务、全局快捷键） |
+| `preload.js` | 安全预加载（contextBridge 白名单 API） |
+| `aiService.js` | AI 能力隔离层（任务拆解、多视角头脑风暴、逐步执行、复盘） |
+| `agentBridge.js` | Hermes 风格本地 Agent 桥接（检测/调用 Claude Code、Codex 等，支持取消杀进程树） |
+| `dataService.js` | 主进程统一数据层（tasks.json 等 JSON 文件管理，原子写 + 防抖 + 缓存） |
+| `src/shared/perspectives.js` | 三视角头脑风暴的**唯一真值**（aiService 与 agent-server 共用，避免分叉） |
+| `src/renderer/js/state/taskStore.js` | 渲染层纯数据层（CRUD/持久化/归档/拓扑排序/迁移） |
+| `src/renderer/js/ai/dispatchClient.js` | AI 分发弹窗 + 调 agent-server + 生成白板卡 |
+| `src/renderer/js/ui/renderTasks.js` | 任务列表 UI 渲染层 |
+| `settings.html` | 设置页（AI 模型选择、API Key 配置） |
+| `agent-server/` | **Pi SDK 智能分发规划服务**（独立 Node.js 服务，OpenAI 兼容） |
+| `agent-server/server.js` | Express 服务（POST /api/dispatch-plan） |
+| `agent-server/pi-planner.js` | 规划核心（系统提示词、JSON 解析、fallback、多视角分析） |
+| `cli/dock-cli.cjs` | 命令行工具（经 named pipe + token 鉴权与主进程通信） |
+| `scripts/install-cli.cjs` | 安装 dock CLI 到 PATH（含 PATH 校验与降级提示） |
+| `css/dock.css` | 公共样式 |
+
+---
+
+## 🤖 AI 分发台（智能分发规划 Agent）
+
+「AI 分发台」区域接入了独立的 Pi SDK 规划服务，工作流如下：
+
+```
+用户输入想法 / 点击已有便利贴 chip
+    ↓
+前端调用 POST http://localhost:3874/api/dispatch-plan
+    ↓
+Pi SDK 识别任务类型（产品设计/代码/调研/学习/生活...）
+    ↓
+拆解为子任务，判断分发对象（自己/AI规划/设计Agent/代码Agent/研究Agent/暂存）
+    ↓
+生成结构化 DispatchPlan JSON
+    ↓
+前端渲染分发卡片（含提示词、理由、预期产出）
+    ↓
+用户确认 → 保存为白板任务卡
+```
+
+**Agent 不执行任何任务**，只负责规划、拆解、分发。
+如果 agent-server 未启动，自动降级为三步法头脑风暴模式。
+
+### 分发对象说明
+
+| routeTo | 含义 |
+| --- | --- |
+| `human` | 我自己处理 |
+| `planning_agent` | 继续让 AI 深入规划 |
+| `design_agent` | 交给设计 Agent |
+| `code_agent` | 交给代码 Agent |
+| `research_agent` | 交给研究 Agent |
+| `later` | 暂存以后做 |
+
 - 入口是 `dock.html` —— **一个真实桌面窗口，只显示一个 AI Daily Dock 面板**，通过状态在三种形态间自由切换（不再三列并排预览）。
 - 视觉、颜色、圆角、阴影、橙色强调色、任务卡片与素材 **完全保留**，未做任何重设计。
 - 前端仍为 **原生 HTML / CSS / JavaScript**，没有引入任何前端框架。
 - 窗口为 **无框 + 透明**，圆角面板带投影浮于桌面（不截图、不绘制桌面壁纸）；顶部「形态切换条」既是三态切换器，也是窗口拖拽区。
 
-### 三种形态（同一个页面，`#app[data-mode]` 驱动，不跳页、不复制页面）
+### 四种形态（同一个页面，`#app[data-mode]` 驱动，不跳页、不复制页面）
 
 | `data-mode` | 内容 | 窗口尺寸 |
 | --- | --- | --- |
-| `expanded`（默认） | 今日重点任务列表、正在进行、交给 AI、AI 工作中、时间安排、灵感 Inbox、今日复盘、底部导航 | 430 × 760 |
-| `compact` | 时间、今日完成进度、当前任务、快速输入、任务/专注/复盘按钮（隐藏任务列表/AI 区/底部导航） | 280 × 330 |
-| `focus` | 当前任务、专注倒计时圆环、任务进度、完成专注/退出（隐藏任务列表与 AI 输入） | 380 × 520 |
+| `expanded`（默认） | 今日重点任务列表、正在进行、交给 AI、AI 工作中、时间安排、灵感 Inbox、今日复盘、底部导航 | 460 × 820 |
+| `compact` | 时间、今日完成进度、当前任务、快速输入、任务/专注/复盘按钮（隐藏任务列表/AI 区/底部导航） | 430 × 330 |
+| `focus` | 当前任务、专注倒计时圆环、任务进度、完成专注/退出（隐藏任务列表与 AI 输入） | 400 × 580 |
+| `board` | 多看板白板：拖拽便利贴、连线依赖、侧边栏看板切换、分发规划入口（窗口居中大窗口） | 1200 × 800 |
 
-切换入口：顶部「紧凑 / 展开 / 专注」分段按钮；展开模式「开始专注」→ focus；专注「退出」→ expanded；紧凑模式点当前任务卡片或「任务」按钮 → expanded；紧凑「专注」→ focus。选择会写入 `localStorage.dailyDockMode` 并在下次启动恢复。
+切换入口：顶部形态切换按钮（紧凑⇄展开）、展开模式「开始专注」→ focus、Alt+B 全局快捷键 → board、分发方案保存为任务卡 → board。选择会写入 `localStorage.dailyDockMode` 并在下次启动恢复。
 
 ---
 
@@ -191,20 +275,42 @@ npm run icon      # node scripts/make-icon.cjs  → 产出 assets/icon.png + ass
 
 ```
 .
-├── main.js              ← Electron 主进程（新增）
-├── preload.js           ← 安全 contextBridge API（新增）
-├── package.json         ← npm / electron-builder 配置（新增）
-├── README.md            ← 本文档（新增）
+├── main.js              ← Electron 主进程（窗口/托盘/IPC/安全加固/CLI 服务/快捷键）
+├── preload.js           ← 安全 contextBridge API
+├── aiService.js         ← AI 能力隔离层（任务拆解/头脑风暴/逐步执行/复盘）
+├── agentBridge.js       ← 本地 CLI Agent 桥接（Claude Code/Codex 等，支持取消杀进程树）
+├── dataService.js       ← 主进程统一数据层（JSON 文件原子写 + 防抖 + 缓存）
+├── package.json         ← npm / electron-builder 配置
+├── README.md            ← 本文档
+├── src/
+│   ├── shared/
+│   │   └── perspectives.js   ← 三视角头脑风暴唯一真值（aiService + agent-server 共用）
+│   └── renderer/js/
+│       ├── state/taskStore.js      ← 渲染层纯数据层（CRUD/持久化/归档/拓扑排序/迁移）
+│       ├── ai/dispatchClient.js    ← AI 分发弹窗 + 调 agent-server + 生成白板卡
+│       └── ui/renderTasks.js       ← 任务列表 UI 渲染层
+├── agent-server/        ← 独立的 Pi SDK 智能分发规划服务（OpenAI 兼容，可选）
+│   ├── server.js            ← Express 服务（POST /api/dispatch-plan）
+│   ├── pi-planner.js        ← 规划核心（多视角分析 + JSON 解析 + fallback）
+│   └── package.json
 ├── scripts/
-│   └── make-icon.cjs    ← 图标生成器（新增）
+│   ├── make-icon.cjs    ← 图标生成器
+│   └── install-cli.cjs  ← 安装 dock CLI 到 PATH（含 PATH 校验与降级提示）
+├── cli/
+│   └── dock-cli.cjs     ← 命令行工具（named pipe + token 鉴权）
 ├── assets/
-│   ├── icon.png         ← 应用图标（新增）
-│   └── tray.png         ← 托盘图标（新增）
+│   ├── icon.png         ← 应用图标
+│   └── tray.png         ← 托盘图标
 ├── css/
-│   └── dock.css         ← 公共样式（原样）
-├── index.html           ← 产品入口 / 启动器（原样）
-├── dock.html            ← 主悬浮面板（仅 5 处接线修改）
-├── settings.html        ← 设置（原样）
-├── agent-detail.html    ← Agent 详情（原样）
-└── recap-history.html   ← 历史复盘（原样）
+│   └── dock.css         ← 公共样式
+├── index.html           ← 产品入口 / 启动器
+├── dock.html            ← 主悬浮面板（compact/board/expanded/focus 四态）
+├── settings.html        ← 设置
+├── agent-detail.html    ← Agent 详情
+└── recap-history.html   ← 历史复盘
 ```
+
+> 渲染层正在从 dock.html 单文件向 `src/renderer/js/` 模块化迁移：
+> 数据层 / AI 分发 / 任务渲染 已拆出，白板交互等仍在 dock.html 内。
+> 外部模块统一经 `window.DOCK.{store,app,render,dispatch}` 命名空间通信，
+> 不再反向注入函数到 store。
